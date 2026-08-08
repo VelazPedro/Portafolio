@@ -28,7 +28,6 @@ export interface GraphFilters {
   year: number | null
   status: string | null
   onlyActive: boolean
-  edgeThreshold: number
 }
 
 export const defaultFilters: GraphFilters = {
@@ -38,7 +37,6 @@ export const defaultFilters: GraphFilters = {
   year: null,
   status: null,
   onlyActive: false,
-  edgeThreshold: 0,
 }
 
 export function dominantLanguage(node: GraphNode): string | null {

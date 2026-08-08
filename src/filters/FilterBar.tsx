@@ -20,7 +20,7 @@ export function FilterBar({ filters, onChange, options }: Props) {
   const update = (patch: Partial<GraphFilters>) => onChange({ ...filters, ...patch })
 
   return (
-    <div className="pointer-events-auto absolute left-4 top-4 z-10 flex max-w-[calc(100%-2rem)] flex-wrap items-center gap-2 rounded-lg border border-white/10 bg-surface/90 p-3 font-mono text-xs backdrop-blur">
+    <div className="flex flex-wrap items-center gap-2 font-mono text-xs">
       <input
         type="search"
         placeholder="buscar proyecto…"
@@ -93,20 +93,6 @@ export function FilterBar({ filters, onChange, options }: Props) {
           onChange={(e) => update({ onlyActive: e.target.checked })}
         />
         solo activos
-      </label>
-
-      <label className="flex items-center gap-1 text-gray-300">
-        umbral aristas
-        <input
-          type="range"
-          min={0}
-          max={1}
-          step={0.05}
-          value={filters.edgeThreshold}
-          onChange={(e) => update({ edgeThreshold: Number(e.target.value) })}
-          aria-label="Umbral mínimo de peso de arista"
-        />
-        <span>{filters.edgeThreshold.toFixed(2)}</span>
       </label>
 
       <button

@@ -35,7 +35,6 @@ interface RepoBundle {
   raw: RawRepoData
   analysis: RepoAnalysis
   summary: RepoSummary
-  summaryIsFallback: boolean
 }
 
 interface SummaryCacheEntry {
@@ -44,32 +43,9 @@ interface SummaryCacheEntry {
 }
 
 // ---- Carga de datos por repo ----
-
-function buildFallbackSummary(raw: RawRepoData, analysis: RepoAnalysis): RepoSummary {
-  const factualHighlights: string[] = []
-  if (analysis.hasCI) factualHighlights.push('Pipeline de CI configurado (.github/workflows)')
-  if (analysis.hasDocker) factualHighlights.push('Incluye Dockerfile')
-  if (analysis.hasTests) factualHighlights.push('Incluye archivos de test')
-  if (analysis.buildTools.value.length > 0) {
-    factualHighlights.push(`Build tools detectadas: ${analysis.buildTools.value.join(', ')}`)
-  }
-  while (factualHighlights.length < 2) factualHighlights.push('Sin evidencia adicional disponible (sin LLM)')
-
-  const techNotes: string[] = [
-    `Runtime: ${analysis.runtime.value ?? 'no identificado'}`,
-    `${analysis.dependencies.length} dependencias declaradas en manifiestos`,
-  ]
-
-  return {
-    pitch: raw.meta.description ?? `Proyecto de tipo ${analysis.projectType.value} en ${analysis.runtime.value ?? 'lenguaje no identificado'}.`,
-    summary: `Resumen generado sin LLM (ANTHROPIC_API_KEY no configurada al momento del build). ${raw.meta.description ?? 'Sin descripción en GitHub.'} Estado: ${analysis.status}, ${raw.commitCount} commits.`,
-    highlights: factualHighlights.slice(0, 4),
-    techNotes: techNotes.slice(0, 4),
-    domain: 'sin-clasificar',
-    keywords: [...new Set([...raw.meta.topics, ...Object.keys(raw.languages)])].map((k) => k.toLowerCase()).slice(0, 8) || ['sin-keywords'],
-    confidence: 'baja',
-  }
-}
+// Solo se incluyen en el grafo los repos que tienen un resumen real en
+// .cache/summaries/. No se fabrica contenido: sin resumen, el repo queda
+// afuera hasta que se genere uno (ver npm run pipeline:summarize).
 
 async function loadBundles(): Promise<RepoBundle[]> {
   let analyzedFiles: string[]
@@ -82,23 +58,18 @@ async function loadBundles(): Promise<RepoBundle[]> {
   const bundles: RepoBundle[] = []
   for (const file of analyzedFiles.filter((f) => f.endsWith('.json'))) {
     const repoName = file.replace(/\.json$/, '')
+    const summaryPath = path.join(SUMMARIES_DIR, file)
+    if (!existsSync(summaryPath)) {
+      console.log(`[skip] ${repoName}: sin resumen en .cache/summaries/, queda afuera del grafo`)
+      continue
+    }
     try {
       const raw = JSON.parse(await readFile(path.join(RAW_DIR, file), 'utf-8')) as RawRepoData
       const analysis = JSON.parse(await readFile(path.join(ANALYZED_DIR, file), 'utf-8')) as RepoAnalysis
+      const entry = JSON.parse(await readFile(summaryPath, 'utf-8')) as SummaryCacheEntry
+      const summary = entry.summary
 
-      const summaryPath = path.join(SUMMARIES_DIR, file)
-      let summary: RepoSummary
-      let summaryIsFallback = false
-      if (existsSync(summaryPath)) {
-        const entry = JSON.parse(await readFile(summaryPath, 'utf-8')) as SummaryCacheEntry
-        summary = entry.summary
-      } else {
-        console.warn(`[fallback] ${repoName}: sin resumen LLM cacheado, uso resumen factual sin LLM (confidence=baja)`)
-        summary = buildFallbackSummary(raw, analysis)
-        summaryIsFallback = true
-      }
-
-      bundles.push({ name: repoName, raw, analysis, summary, summaryIsFallback })
+      bundles.push({ name: repoName, raw, analysis, summary })
     } catch (err) {
       console.error(`[skip] ${repoName}: ${err instanceof Error ? err.message : String(err)}`)
     }
@@ -208,7 +179,7 @@ function computeEdge(a: RepoBundle, b: RepoBundle): GraphEdge {
     reasons.push({ kind: 'topics', weight: topicsJaccard * weights.topics, detail: `topics/keywords compartidos: ${(topicsJaccard * 100).toFixed(0)}%` })
   }
 
-  const sameDomain = a.summary.domain === b.summary.domain && a.summary.domain !== 'sin-clasificar'
+  const sameDomain = a.summary.domain === b.summary.domain
   if (sameDomain) {
     reasons.push({ kind: 'dominio', weight: weights.dominio, detail: `mismo dominio: ${a.summary.domain}` })
   }
@@ -337,9 +308,6 @@ export async function main(): Promise<void> {
 
   const orphans = nodes.filter((n) => !edges.some((e) => e.source === n.id || e.target === n.id))
   console.log(`[ok] graph.json generado: ${nodes.length} nodos, ${edges.length} aristas, ${orphans.length} huérfanos`)
-  if (bundles.some((b) => b.summaryIsFallback)) {
-    console.warn('[aviso] algunos nodos usan resumen factual sin LLM (correr pipeline:summarize con ANTHROPIC_API_KEY para reemplazarlos)')
-  }
 }
 
 const isMain = process.argv[1] !== undefined && import.meta.url === pathToFileURL(process.argv[1]).href

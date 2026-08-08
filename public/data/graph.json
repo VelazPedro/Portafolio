@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-08T00:24:08.683Z",
+  "generatedAt": "2026-08-08T15:28:04.786Z",
   "nodes": [
     {
       "id": "CalculadoraMonotributo",
@@ -56,26 +56,37 @@
         "hasCI": false,
         "hasDocker": false,
         "hasDocs": true,
-        "daysAlive": 63,
-        "daysSinceLastPush": 0,
+        "daysAlive": 64,
+        "daysSinceLastPush": 1,
         "status": "activo"
       },
       "summary": {
-        "pitch": "Calculadora de monotributo en C. Proximamente, su versión en Python con acceso a una API que la mantenga al día.",
-        "summary": "Resumen generado sin LLM (ANTHROPIC_API_KEY no configurada al momento del build). Calculadora de monotributo en C. Proximamente, su versión en Python con acceso a una API que la mantenga al día. Estado: activo, 8 commits.",
+        "pitch": "Calculadora del monotributo argentino con los valores vigentes desde febrero 2026, disponible como programa de consola en C y como página web de un solo archivo, para monotributistas que necesitan ubicar su categoría y estimar la cuota.",
+        "summary": "La escala del monotributo cambia en cada recategorización de ARCA, lo que deja desactualizadas las tablas de referencia. El repositorio implementa el cálculo dos veces sobre la misma tabla y la misma lógica: monotributo.c como programa de consola y docs/index.html como página estática sin build ni dependencias. La versión web cubre las mismas cuatro funciones del menú de consola: cálculo de categoría con desglose de cuota (impuesto integrado, SIPA y obra social), comparación de los últimos 12 meses para recategorización, tabla completa filtrable por tipo de actividad y fechas de vencimiento. La actualización de valores está documentada como un reemplazo de la constante TABLA en ambos archivos. El README menciona una futura versión en Python con acceso a una API que mantenga los valores al día.",
         "highlights": [
-          "Sin evidencia adicional disponible (sin LLM)",
-          "Sin evidencia adicional disponible (sin LLM)"
+          "Duplicación deliberada de la tabla de categorías y la lógica de cálculo en C y en JavaScript, con el README señalando explícitamente los dos puntos a editar en cada recategorización.",
+          "La versión web es un único index.html sin dependencias ni paso de build, publicable en GitHub Pages sirviendo la carpeta /docs de la rama main.",
+          "La tabla de escalas está aislada como una constante nombrada (TABLA) en ambas implementaciones, con los mismos campos y el mismo orden, en lugar de valores dispersos en el código.",
+          "El binario y el objeto compilados (monotributo.exe, monotributo.o) están versionados en el repo, de modo que la versión de consola se ejecuta sin compilar."
         ],
         "techNotes": [
-          "Runtime: C",
-          "0 dependencias declaradas en manifiestos"
+          "C compilado con gcc enlazando la biblioteca matemática (-lm); no hay makefile ni sistema de build.",
+          "Frontend en HTML, CSS y JavaScript embebidos en un solo archivo: sin package.json, sin bundler y sin dependencias externas.",
+          "Estructura mínima: raíz con el fuente y los artefactos de compilación, y docs/ como raíz de publicación estática.",
+          "Sin capa de datos remota en el estado actual: los valores están hardcodeados en el código, y el consumo de una API queda planteado sólo como trabajo futuro."
         ],
-        "domain": "sin-clasificar",
+        "domain": "finanzas",
         "keywords": [
-          "c"
+          "monotributo",
+          "arca",
+          "recategorización",
+          "escala de categorías",
+          "impuesto integrado",
+          "github pages",
+          "html de archivo único",
+          "cli en c"
         ],
-        "confidence": "baja"
+        "confidence": "alta"
       },
       "size": 9.9,
       "color": "#555555",
@@ -83,41 +94,41 @@
       "cluster": 0
     },
     {
-      "id": "ITLeveling",
+      "id": "PC_DOCTOR",
       "repo": {
-        "name": "ITLeveling",
-        "description": null,
-        "url": "https://github.com/VelazPedro/ITLeveling",
+        "name": "PC_DOCTOR",
+        "description": "Solucionador para cualesquier inconveniente que puede llegar a presentar la pc",
+        "url": "https://github.com/VelazPedro/PC_DOCTOR",
         "homepage": null,
         "topics": [],
         "license": null,
-        "createdAt": "2026-08-05T18:36:37Z",
-        "pushedAt": "2026-08-05T18:43:55Z",
+        "createdAt": "2026-08-08T15:08:03Z",
+        "pushedAt": "2026-08-08T15:19:47Z",
         "commitCount": 1,
         "stars": 0,
         "forks": 0,
         "languages": {
-          "JavaScript": 46506,
-          "CSS": 16713,
-          "HTML": 8589,
-          "Python": 2220,
-          "PowerShell": 1153
+          "Python": 249360,
+          "JavaScript": 36004,
+          "CSS": 18521,
+          "HTML": 4170,
+          "Batchfile": 2559
         },
         "defaultBranch": "main",
-        "readme": "# IT Leveling\n\nDashboard de gamificación para soporte IT: cargás tickets y el sistema calcula\nsolo la experiencia, el nivel y las seis estadísticas del operador.\n\n## Cómo ejecutarlo\n\n### Como aplicación de escritorio (.exe)\n\n`dist\\IT Leveling.exe` es un único archivo portable: doble clic y abre en su propia\nventana, sin navegador ni URL que escribir. Pesa ~14 MB y no necesita Python instalado\nen la máquina donde corre.\n\nPara recompilarlo después de tocar el código:\n\n```bash\npython -m pip install pywebview pyinstaller\n```\n\n```bash\npowershell -ExecutionPolicy Bypass -File build.ps1\n```\n\nDetalles del empaquetado ([main.py](main.py)):\n\n- Usa **WebView2** (el motor de Edge, ya viene con Windows 10/11), por eso el .exe es chico.\n- Adentro levanta un servidor local en `127.0.0.1:47820`, pero eso es transparente: la app\n  lo arranca y lo cierra sola. El puerto es fijo a propósito, porque IndexedDB separa los\n  datos por origen y un puerto al azar borraría el progreso en cada arranque.\n- Los datos van a `%LOCALAPPDATA%\\ITLeveling`, así que sobreviven a cerrar la app y a\n  recompilar el .exe. Para empezar de cero, borrar esa carpeta.\n- Si el puerto está ocupado (típicamente porque ya hay una ventana abierta), avisa con un\n  cartel en vez de fallar en silencio.\n\n### En el navegador (desarrollo)\n\nUsa módulos ES, así que necesita servirse por HTTP (abrirlo con doble clic no alcanza).\n\n```bash\npython -m http.server 5173\n```\n\nDespués entrar a `http://localhost:5173`.\n\n## Estructura\n\n| Archivo | Qué hace |\n|---|---|\n| `main.py` | Envoltorio de escritorio: ventana nativa + servidor interno en puerto fijo. |\n| `build.ps1` | Compila el `.exe` de un solo archivo con PyInstaller. |\n| `index.html` | Estructura del dashboard y los dos modales (carga de ticket / subida de nivel). |\n| `css/styles.css` | Estética: degradé azul, bordes duros, sin radios, scanlines CRT. |\n| `js/db.js` | Base de datos local (IndexedDB): tablas `usuarios` y `tickets`. Sin servidor ni conexión. |\n| `js/config.js` | Todo lo parametrizable: stats, tipos de ticket, urgencias, roles, TDR, rangos, topes y curva de XP. |\n| `js/pixelart.js` | Sprites dibujados como grillas de caracteres, convertidos a SVG. Sin imágenes externas. |\n| `js/motor.js` | Cálculo puro: ticket → deltas de cada estadística + XP. |\n| `js/estado.js` | Usuario, nivel, estadísticas, historial, persistencia y armado del informe automático. |\n| `js/ui.js` | Pintado del dashboard. |\n| `js/app.js` | Une todo y maneja los eventos. |\n\n## Base de datos y sesiones\n\nToda la información vive en **IndexedDB**, la base que trae el navegador: es una base\nreal (tablas, índices, transacciones) que corre 100% en la máquina, sin servidor ni internet.\n\n- Tabla `usuarios` — un registro por personaje, con clave el nombre normalizado\n  (mayúsculas y sin espacios de más, así \"pablo\", \"Pablo \" y \"PABLO\" son el mismo).\n  Guarda nivel, XP, XP total acumulada, las seis estadísticas, tickets totales y el último informe.\n- Tabla `tickets` — id autoincremental, índices por usuario y por fecha. Guarda los datos\n  cargados más el `ProgresoStatxTicket` (delta de cada estadística) y la XP que dio.\n\nAntes de entrar, la pantalla de ingreso pide el nombre. Si ya existe, se recupera el\nprogreso tal cual quedó; si no, se crea el personaje en nivel 1. Debajo aparecen los\npersonajes guardados para entrar de un clic. Si venías de la versión anterior con partida\nen localStorage, se importa automáticamente la primera vez.\n\n## Ventanas del menú\n\nEl botón de menú (arriba a la izquierda) abre:\n\n- **CLASIFICACIÓN** — tabla con todos los personajes creados, ordenados por nivel y después\n  por XP total, con rango y cantidad de tickets. Tu fila queda resaltada.\n- **TICKETS** — compilado de todos los tickets cargados, del más nuevo al más viejo, con el\n  detalle completo: categoría y dificultad, demora real contra la esperada, urgencia, rol\n  de quien lo creó, TDR, nivel resultante y cuánto movió cada estadística. Se puede filtrar\n  entre los tuyos y los de todos los personajes.\n- **CAMBIAR USUARIO** — guarda y vuelve a la pantalla de ingreso.\n\n## Cómo se calculan las estadísticas\n\nCada ticket aporta: categoría (dificultad e importancia), demora real, urgencia,\nrol de quien lo creó y TDR (cómo llegó: Jarvis, asignado, derivado o voluntario).\n\nEl motor compara la demora contra un tiempo esperado (referencia del tipo ajustada\npor urgencia) y de ahí sale un rendimiento entre -1.6 y 1.6 que alimenta cada stat:\n\n- **Velocidad** — rendimiento contra el tiempo esperado, amplificado por la urgencia.\n- **Confianza** — importancia del pedido cumplido en término; fallar en algo importante resta más.\n- **Investigación** — sube con la dificultad; extra si además llevó tiempo; resta si un ticket trivial se estiró.\n- **Comunicación** — derivaciones, roles altos y urgencias críticas.\n- **Efectividad** — resultado global del ticket.\n- **Voluntario** — sólo suma cuando el ticket se tomó por decisión propia. Sin tope.\n\nNingún delta supera ±8/+10 por ticket, y ninguna stat baja de 0.\n\n## Nivel y topes\n\n- Nivel máximo: 100. XP para el próximo nivel: `80 + (nivel - 1) * 20`.\n- Tope de stats: `20 + (nivel - 1) * 2` (nivel 1 = 20, nivel 100 = 218). Voluntario no tiene tope.\n- Al subir de nivel aparece el panel dorado con nivel anterior, nuevo, rango y tope nuevo.\n\n## Rangos\n\n| Nivel | Rango |\n|---|---|\n| 100 | REGEN DE RAFA |\n| 81-99 | REFERENTE DE FACTO |\n| 66-80 | SOPORTE DE JERARQUÍA |\n| 51-65 | REY DE LOS WACHINES |\n| 36-50 | TIPO DE MEGATECH |\n| 21-35 | SOPORTE NIVEL -1 |\n| 11-20 | TIPO QUE RESUELVE |\n| 1-10 | RANDOM |\n\n## Utilidades de consola\n\n```js\nITL.estado()               // personaje con la sesión abierta\nITL.usuarios()             // todos los personajes de la base\nITL.tickets()              // todos los tickets de la base\nITL.borrarUsuario('PABLO') // borra un personaje y sus tickets\n```\n"
+        "readme": "# 🩺 PC Doctor\n\nDashboard local de diagnóstico y optimización pa Windows. Post-its que\nejecutan comando real en tu máquina. Sin mocks, sin simulación.\n\n91 post-its, 10 secciones.\n\n---\n\n## Instalación y arranque\n\nRequisito: Windows 10/11, Python 3.10+, con `py` en el PATH.\n\n**Abrir `start.bat` como ADMINISTRADOR.** Clic derecho → \"Ejecutar como\nadministrador\". El script pide UAC solo, pero si UAC está bloqueado en tu PC,\nhacelo vos a mano. Sin admin, media herramienta falla (DISM, SFC, chkdsk,\nservicios, features).\n\n`start.bat` hace todo: crea `.venv`, instala `requirements.txt`, levanta\nservidor en `http://127.0.0.1:8777`, abre navegador.\n\nAlternativa: `npm start` (mismo arranque, sin auto-elevación UAC — corré la\nterminal como admin vos mismo antes).\n\nArranque manual dev (sin admin, sin browser):\n```\n.venv\\Scripts\\python.exe -m app.main --no-browser\n```\n\nServidor solo en `127.0.0.1`. No expuesto a red.\n\n---\n\n## Advertencias\n\nComandos reales, con privilegios admin. Leé cada modal antes de confirmar.\n\n- Verde = lectura, no cambia nada.\n- Ámbar = modifica sistema, pide confirmación.\n- Rojo = difícil o imposible revertir (`/ResetBase`, `Windows.old`,\n  hibernación, papelera, puntos de restauración, `chkdsk /f /r`).\n- Antes de acción riesgosa: post-it \"Crear punto de restauración\".\n\n### Qué nunca toca\n\nBloqueado en código (`app/core/safety.py`, `app/config.py`), no solo en UI:\n\n- Carpetas de usuario (Documentos, Escritorio, Descargas, OneDrive, etc).\n- Raíces de unidad y `C:\\Windows`, `C:\\Program Files`.\n- Servicios críticos (RPC, DCOM, Defender, Update, DNS, etc).\n- Appx del sistema (Store, Shell, .NET, VCLibs).\n- Registro, salvo lista blanca en `config.py`.\n- Duplicados: se detectan, nunca se borran.\n\nParámetros interpolados en comandos: validados contra regex, se rechaza\ncualquier caracter de shell. No hay inyección posible desde la interfaz.\n\n---\n\n## Reversibilidad\n\nCada cambio (servicio, arranque, feature) guarda estado previo en\n`state/rollback.json`. Post-it \"Revertir últimos cambios\" deshace todo, del\nmás nuevo al más viejo.\n\nRegistro desactivado: se mueve a clave paralela `..._PCDoctorDisabled`, no se\nborra. Accesos directos de Inicio: se mueven a\n`state/startup_deshabilitados/`.\n\n---\n\n## Dónde queda todo\n\n```\nlogs/YYYY-MM-DD.log   una entrada por ejecución\nreports/              informes HTML, dxdiag, msinfo32, batería, energía, WLAN\nstate/rollback.json   cambios reversibles\nstate/snapshot-*.json snapshots pa comparar informes\n```\n\n---\n\n## Arquitectura\n\n```\napp/\n  commands/     registro declarativo: una entrada = un post-it\n  core/         ejecutor streaming, shells, logging, seguridad, rollback\n  services/     métricas, inventario, procesos, limpieza, disco, reportes\n  api/          REST + WebSockets\n  data/         catálogos: servicios, bloatware, procesos conocidos\nweb/            HTML/CSS/JS vanilla, sin build ni CDN\n```\n\n**Endpoints clave:**\n\n| Ruta | Qué hace |\n|---|---|\n| `GET /api/actions` | registro completo, dibuja la UI |\n| `GET /api/actions/{id}/preview` | vista previa sin ejecutar |\n| `WS /ws/exec/{action_id}` | ejecución con salida en vivo |\n| `WS /ws/metrics` | métricas cada 2s |\n| `GET /api/docs` | docs OpenAPI |\n\n### Agregar post-it\n\nSolo se toca el registro, UI se regenera sola.\n\n```python\n# app/commands/limpieza.py\nAccion(\n    id=\"lim_mi_cosa\", titulo=\"Mi limpieza\", categoria=CAT,\n    descripcion=\"Lo que aparece en el papelito.\", icono=\"🧽\",\n    riesgo=MODIFICACION,          # LECTURA | MODIFICACION | CRITICO\n    shell=POWERSHELL,             # POWERSHELL | CMD | PYTHON\n    comando=\"Get-ChildItem C:\\\\algo\",\n    advertencia=\"Qué hace y qué se pierde.\",\n)\n```\n\n---\n\n## Notas rápidas\n\n- Puerto 8777 ocupado por otra instancia propia: se cierra sola. Ocupado por\n  otro programa: aborta, muestra PID, cambiá `PUERTO` en `app/config.py`.\n- Sin admin: DISM, SFC, chkdsk, features y servicios fallan con \"acceso\n  denegado\".\n- Temperatura casi nunca disponible (Windows raro la expone).\n- VRAM de placas >4GB: se lee del registro DirectX, no de WMI (desborda).\n- GPUtil solo habla con NVIDIA.\n- \"Lo que más ocupa\": 3-6 min la primera vez, recorre todo `C:`.\n- `wmic` deprecado, todo usa `Get-CimInstance`.\n\n---\n\n## Licencia\n\nHerramienta personal, local, sin autenticación. Tu máquina, tu criterio, tu\nresponsabilidad. Leé los modales, hacé backup de lo que importe.\n"
       },
       "analysis": {
         "projectType": {
-          "value": "web-app",
-          "evidence": "index.html presente en el repo"
+          "value": "api",
+          "evidence": "dependency: fastapi"
         },
         "primaryFramework": {
-          "value": null,
-          "evidence": "sin framework detectado en dependencias"
+          "value": "FastAPI",
+          "evidence": "dependency: fastapi"
         },
         "runtime": {
-          "value": "JavaScript",
-          "evidence": "lenguaje dominante por bytes (endpoint /languages)"
+          "value": "Node",
+          "evidence": "manifiesto: package.json"
         },
         "database": {
           "value": null,
@@ -131,47 +142,98 @@
           "value": [],
           "evidence": "sin herramientas de test detectadas"
         },
-        "dependencies": [],
-        "fileCount": 14,
-        "maxDepth": 1,
+        "dependencies": [
+          {
+            "name": "fastapi",
+            "version": ">=0.110",
+            "type": "prod"
+          },
+          {
+            "name": "uvicorn",
+            "version": ">=0.27",
+            "type": "prod"
+          },
+          {
+            "name": "psutil",
+            "version": ">=5.9",
+            "type": "prod"
+          },
+          {
+            "name": "WMI",
+            "version": ">=1.5.1",
+            "type": "prod"
+          },
+          {
+            "name": "pywin32",
+            "version": ">=306",
+            "type": "prod"
+          },
+          {
+            "name": "py-cpuinfo",
+            "version": ">=9.0",
+            "type": "prod"
+          },
+          {
+            "name": "requests",
+            "version": ">=2.31",
+            "type": "prod"
+          },
+          {
+            "name": "GPUtil",
+            "version": ">=1.4.0",
+            "type": "prod"
+          }
+        ],
+        "fileCount": 59,
+        "maxDepth": 2,
         "topLevelDirs": [
-          ".claude",
-          "css",
-          "js"
+          "app",
+          "logs",
+          "reports",
+          "scripts",
+          "state",
+          "web"
         ],
         "hasTests": false,
         "hasCI": false,
         "hasDocker": false,
         "hasDocs": false,
-        "daysAlive": 2,
-        "daysSinceLastPush": 2,
+        "daysAlive": 0,
+        "daysSinceLastPush": 0,
         "status": "activo"
       },
       "summary": {
-        "pitch": "Proyecto de tipo web-app en JavaScript.",
-        "summary": "Resumen generado sin LLM (ANTHROPIC_API_KEY no configurada al momento del build). Sin descripción en GitHub. Estado: activo, 1 commits.",
+        "pitch": "Dashboard local para Windows que ejecuta comandos reales de diagnóstico, limpieza y optimización del sistema desde una interfaz de post-its, pensado para uso personal en la propia máquina.",
+        "summary": "Las tareas de mantenimiento de Windows están dispersas entre PowerShell, CMD y utilidades del sistema, y ejecutarlas a mano exige recordar sintaxis y consecuencias. El proyecto expone 91 acciones agrupadas en 10 secciones como post-its que lanzan el comando real en la máquina, con salida en vivo, sin simulación. Un servidor FastAPI escucha sólo en 127.0.0.1:8777 y start.bat arma el entorno virtual, instala dependencias, pide elevación UAC y abre el navegador. Cada acción está clasificada por riesgo (lectura, modificación, crítico) y los cambios reversibles guardan estado previo en state/rollback.json, con un post-it dedicado a deshacerlos en orden inverso. Las salidas quedan en logs diarios y en informes bajo reports/.",
         "highlights": [
-          "Sin evidencia adicional disponible (sin LLM)",
-          "Sin evidencia adicional disponible (sin LLM)"
+          "Las restricciones de seguridad están implementadas en el backend (app/core/safety.py, app/config.py) y no sólo en la UI: quedan fuera de alcance carpetas de usuario, raíces de unidad, C:\\Windows, servicios críticos, Appx del sistema y el registro salvo lista blanca.",
+          "Los parámetros interpolados en los comandos se validan contra expresiones regulares y se rechaza cualquier metacaracter de shell, cerrando la inyección desde la interfaz.",
+          "Reversibilidad explícita por diseño: las claves de registro desactivadas se renombran a una clave paralela con sufijo _PCDoctorDisabled y los accesos directos de inicio se mueven a state/startup_deshabilitados/ en lugar de borrarse; los duplicados se detectan pero nunca se eliminan.",
+          "Registro declarativo de acciones: agregar un post-it consiste en declarar una instancia de Accion (id, categoría, riesgo, shell, comando, advertencia) en app/commands/, y la interfaz se regenera desde GET /api/actions."
         ],
         "techNotes": [
-          "Runtime: JavaScript",
-          "0 dependencias declaradas en manifiestos"
+          "Backend en Python 3.10+ con FastAPI y uvicorn[standard]; la ejecución se transmite por WebSocket (/ws/exec/{action_id}) y las métricas se emiten cada 2 segundos por /ws/metrics.",
+          "Recolección de datos del sistema con psutil, WMI, pywin32, py-cpuinfo y GPUtil; requests como única dependencia de red.",
+          "Frontend en HTML, CSS y JavaScript vanilla bajo web/, sin paso de build ni recursos por CDN.",
+          "Los comandos se apoyan en Get-CimInstance en lugar de wmic (deprecado), y la VRAM de placas de más de 4 GB se lee del registro de DirectX porque el valor de WMI desborda."
         ],
-        "domain": "sin-clasificar",
+        "domain": "devtools",
         "keywords": [
-          "javascript",
-          "css",
-          "html",
-          "python",
-          "powershell"
+          "windows",
+          "post-its de comandos",
+          "niveles de riesgo",
+          "rollback",
+          "fastapi",
+          "websockets",
+          "get-ciminstance",
+          "elevación uac"
         ],
-        "confidence": "baja"
+        "confidence": "alta"
       },
       "size": 3.4,
-      "color": "#f1e05a",
+      "color": "#3572A5",
       "dashedBorder": false,
-      "cluster": 1
+      "cluster": 0
     },
     {
       "id": "PredictorMundial",
@@ -308,196 +370,231 @@
         "hasCI": false,
         "hasDocker": false,
         "hasDocs": false,
-        "daysAlive": 109,
-        "daysSinceLastPush": 2,
+        "daysAlive": 110,
+        "daysSinceLastPush": 3,
         "status": "activo"
       },
       "summary": {
-        "pitch": "Proyecto de tipo script en Python.",
-        "summary": "Resumen generado sin LLM (ANTHROPIC_API_KEY no configurada al momento del build). Sin descripción en GitHub. Estado: activo, 9 commits.",
+        "pitch": "Predictor de los partidos del Mundial 2026 basado en puntaje histórico acumulado de cada selección, con motor en Python y una interfaz web local para explorar fixture, ranking y cruces arbitrarios.",
+        "summary": "El proyecto arma un puntaje por selección a partir de datos históricos de resultados obtenidos por scraping de Wikipedia y del dataset results.csv, de unas 49.000 filas, e incluye también los partidos posteriores al último mundial. Con ese puntaje decide el ganador previsto de cada uno de los 104 partidos del Mundial 2026. Sobre ese motor (mundial.py, prueba.py) se agregó una capa web en Flask que no altera la mecánica: app.py importa mundial.py y sólo lee las estructuras selecciones, partidos y tablaPartido, cacheando el resultado y sirviéndolo como JSON. El frontend ofrece tres vistas — fixture agrupado por fase con filtros, ranking de selecciones con podio e historial mundialista, y un comparador libre entre dos selecciones. El README plantea como trabajo futuro incorporar el ranking FIFA vía API para ponderar los puntajes.",
         "highlights": [
-          "Sin evidencia adicional disponible (sin LLM)",
-          "Sin evidencia adicional disponible (sin LLM)"
+          "Separación entre motor y presentación: la interfaz sólo consume las estructuras ya calculadas por mundial.py, y el README documenta que un cambio en el sistema de puntajes se refleja sin tocar el frontend.",
+          "Caché en archivo (.cache_predictor.json) con vencimiento de 6 horas y un botón de recálculo que fuerza un scrapeo nuevo, para evitar rehacer el scraping y el procesamiento del CSV en cada arranque.",
+          "El criterio de decisión del frontend replica las mismas expresiones de comparación del bucle final de mundial.py (pts1 > pts2, empate técnico si igualan), en lugar de definir una regla paralela.",
+          "El repositorio documenta un defecto pendiente en el propio versionado: el archivo de ignore está nombrado .gitIgnore y por eso no aplica ninguna regla hasta renombrarlo con git mv."
         ],
         "techNotes": [
-          "Runtime: Python",
-          "15 dependencias declaradas en manifiestos"
+          "Python 3.10+ con pandas para el procesamiento tabular y lxml + beautifulsoup4 para el scraping de Wikipedia; requests y flask se suman para la capa web.",
+          "Servidor Flask en app.py con templates/index.html y estáticos propios (estilos.css, app.js); el JavaScript sólo renderiza, filtra y compara, sin calcular puntajes.",
+          "results.csv está versionado en el repo como fuente histórica local, complementando los datos scrapeados.",
+          "Módulo auxiliar banderas.py que mapea selecciones a emojis de bandera, sin efecto sobre el cálculo."
         ],
-        "domain": "sin-clasificar",
+        "domain": "datos",
         "keywords": [
-          "python",
-          "css",
-          "javascript",
-          "html"
+          "mundial 2026",
+          "scraping de wikipedia",
+          "puntaje histórico acumulado",
+          "results.csv",
+          "flask",
+          "pandas",
+          "caché con expiración",
+          "ranking fifa"
         ],
-        "confidence": "baja"
+        "confidence": "media"
       },
       "size": 10.4,
       "color": "#3572A5",
       "dashedBorder": false,
-      "cluster": 1
-    },
-    {
-      "id": "SIMON-IN-C",
-      "repo": {
-        "name": "SIMON-IN-C",
-        "description": "Juego de simón en C, con mecánicas basadas en lógica e implementadas en un entorno gráfico con SDL2 y sus variantes.",
-        "url": "https://github.com/VelazPedro/SIMON-IN-C",
-        "homepage": null,
-        "topics": [],
-        "license": null,
-        "createdAt": "2025-10-31T23:31:11Z",
-        "pushedAt": "2025-10-31T23:41:13Z",
-        "commitCount": 2,
-        "stars": 0,
-        "forks": 0,
-        "languages": {
-          "C": 54307
-        },
-        "defaultBranch": "main",
-        "readme": "##  Attention\n\nThis project requires the following libraries to compile correctly:\n\n- **SDL2** ≥ 2.32.8  \n- **SDL2_ttf** ≥ 2.24.0  \n- **SDL2_mixer** ≥ 2.8.1  \n\nYou can link them according to your preferred IDE or build system.  \nFor **Code::Blocks**, version **20.03 or higher** is recommended to ensure proper linking.\n\n###  Build Instructions\n\n1. Install the required SDL2 libraries listed above.\n2. Open the project in your IDE (e.g., Code::Blocks or VSCode).\n3. Link the libraries and include directories according to your setup.\n4. Build and run the project.\n"
-      },
-      "analysis": {
-        "projectType": {
-          "value": "otro",
-          "evidence": "sin heurística concluyente"
-        },
-        "primaryFramework": {
-          "value": null,
-          "evidence": "sin framework detectado en dependencias"
-        },
-        "runtime": {
-          "value": "C",
-          "evidence": "lenguaje dominante por bytes (endpoint /languages)"
-        },
-        "database": {
-          "value": null,
-          "evidence": "sin base de datos detectada en dependencias"
-        },
-        "buildTools": {
-          "value": [],
-          "evidence": "sin herramientas de build detectadas"
-        },
-        "testTools": {
-          "value": [],
-          "evidence": "sin herramientas de test detectadas"
-        },
-        "dependencies": [],
-        "fileCount": 14,
-        "maxDepth": 1,
-        "topLevelDirs": [
-          "fnt",
-          "snd"
-        ],
-        "hasTests": false,
-        "hasCI": false,
-        "hasDocker": false,
-        "hasDocs": false,
-        "daysAlive": 280,
-        "daysSinceLastPush": 280,
-        "status": "pausado"
-      },
-      "summary": {
-        "pitch": "Juego de simón en C, con mecánicas basadas en lógica e implementadas en un entorno gráfico con SDL2 y sus variantes.",
-        "summary": "Resumen generado sin LLM (ANTHROPIC_API_KEY no configurada al momento del build). Juego de simón en C, con mecánicas basadas en lógica e implementadas en un entorno gráfico con SDL2 y sus variantes. Estado: pausado, 2 commits.",
-        "highlights": [
-          "Sin evidencia adicional disponible (sin LLM)",
-          "Sin evidencia adicional disponible (sin LLM)"
-        ],
-        "techNotes": [
-          "Runtime: C",
-          "0 dependencias declaradas en manifiestos"
-        ],
-        "domain": "sin-clasificar",
-        "keywords": [
-          "c"
-        ],
-        "confidence": "baja"
-      },
-      "size": 5.2,
-      "color": "#555555",
-      "dashedBorder": true,
       "cluster": 0
     },
     {
-      "id": "TrabajoPracticoENUT",
+      "id": "StudyHUD",
       "repo": {
-        "name": "TrabajoPracticoENUT",
-        "description": "Trabajo practico de analisis de un alto volumen de datos en C",
-        "url": "https://github.com/VelazPedro/TrabajoPracticoENUT",
+        "name": "StudyHUD",
+        "description": null,
+        "url": "https://github.com/VelazPedro/StudyHUD",
         "homepage": null,
         "topics": [],
         "license": null,
-        "createdAt": "2026-05-29T13:37:09Z",
-        "pushedAt": "2026-05-31T22:10:15Z",
-        "commitCount": 5,
-        "stars": 0,
+        "createdAt": "2026-08-07T16:43:10Z",
+        "pushedAt": "2026-08-08T00:59:46Z",
+        "commitCount": 2,
+        "stars": 1,
         "forks": 0,
         "languages": {
-          "C": 18178
+          "TypeScript": 122092,
+          "JavaScript": 10847,
+          "CSS": 3474,
+          "HTML": 731
         },
         "defaultBranch": "main",
-        "readme": "# TrabajoPracticoENUT\nTrabajo practico de analisis de un alto volumen de datos en C\n"
+        "readme": "# Study HUD\n\nVisor y entorno de estudio 100% local y offline para material universitario.\nNo consume ninguna API paga ni de IA — el motor de generación sos vos\npidiéndole el contenido a Claude Code (u otra IA, o escribiéndolo a mano)\ndesde la terminal, siguiendo [`GENERAR.md`](./GENERAR.md). La app solo lee\nesos archivos de `/material/generado/` y los muestra: resúmenes, exámenes,\nflashcards y un buscador offline (BM25) sobre el material.\n\n## Instalación\n\n```bash\nnpm install\nnpm run dev\n```\n\nAbrí `http://localhost:5173`. No hay ninguna key que configurar — la app\nfunciona completa sin conexión a internet.\n\n## Flujo de trabajo\n\n```\n1. Dejás tus PDFs en material/entrada/\n2. npm run extraer          → extrae texto a material/texto/*.md + indice.json\n3. Le pedís cada artefacto a Claude Code (comandos copiables en GENERAR.md)\n   → escribe material/generado/<slug>/{resumen,examen,tarjetas,contexto}.json\n4. npm run validar          → chequea que los JSON tengan el esquema correcto\n5. Abrís la app — lo que ya generaste se ve, lo que falta aparece como\n   \"pendiente\" con el comando exacto para pedirlo\n```\n\nSi volvés a correr `npm run extraer` o regenerás un JSON con la app abierta,\nla vista se actualiza sola (polling cada 2s) — no hace falta recargar.\nLos `id` de `tarjetas.json` importan: si los mantenés al regenerar, esas\ntarjetas conservan su progreso de repetición espaciada (SM-2); con `id`\nnuevos arrancan de cero.\n\n## Estructura de carpetas\n\n```\nmaterial/\n  entrada/               # PDFs que dejás vos (no se versionan)\n  texto/                 # <slug>.md por PDF + indice.json — genera `npm run extraer`\n  generado/<slug>/       # resumen.json, examen.json, tarjetas.json, contexto.json\n                          # — los escribís vos / Claude Code siguiendo GENERAR.md\n  pendientes.json        # preguntas hechas en el buscador offline, acumuladas\n\nscripts/\n  extraer.mjs             # Node + pdfjs-dist, sin red: PDF → texto + indice.json\n  validar.mjs              # valida el esquema de cada JSON en material/generado/\n\nsrc/\n  types/\n    material.ts            # tipos del contrato de datos (indice, resumen, examen,\n                            # tarjetas, contexto) — la fuente de verdad del esquema\n    index.ts                # tipos de progreso propio (IndexedDB) y config de UI\n\n  lib/                    # Toda la lógica de negocio, sin JSX\n    materialClient.ts       # única puerta de entrada a /material/** (fetch, nunca red externa)\n    prompts.ts                # ya no se importa en runtime — instrucciones de referencia\n                               # para GENERAR.md (qué pedirle a la IA por cada artefacto)\n    db.ts                      # IndexedDB: SOLO progreso propio (exámenes, SM-2, materia)\n    retrieval.ts                 # buscador offline BM25 sobre contexto.json\n    sm2.ts                        # algoritmo de repetición espaciada SM-2\n    csv.ts                         # exportación de mazos a CSV compatible con Anki\n\n  store/                 # Estado global (Zustand)\n    documentsStore.ts     # lee indice.json con polling; sin lógica de subida\n    settingsStore.ts        # solo tema (claro/oscuro/sistema)\n    toastStore.ts             # notificaciones\n\n  hooks/\n    usePolling.ts          # hook genérico: re-fetch cada 2s (es el \"hot reload\" de /material/**)\n    useDocumentChunks.ts     # chunks de contexto.json para el buscador\n\n  components/\n    layout/               # AppShell, Sidebar, Topbar — sin tocar\n    ui/                    # Card, Button, Badge, ProgressBar, Skeleton, ToastContainer — sin tocar\n    documents/               # DocumentCard, EstadoPendiente (bloque copiable \"generá esto\")\n\n  features/               # Un módulo por funcionalidad\n    summaries/              # visor de resumen.json (Express / Por temas / Conceptos)\n    chat/                    # buscador offline BM25, ya no es un chat con IA\n    exams/                   # filtra examen.json por tipo/dificultad/tema — no genera\n    flashcards/               # lee tarjetas.json, mergea progreso SM-2 por id\n    dashboard/                 # métricas + panel \"Material pendiente\"\n\n  pages/                 # Dashboard, DocumentWorkspace (con tabs), Settings\n\nvite.material-plugin.ts  # sirve /material/** al navegador (dev y preview) + POST\n                          # /material/pendientes — todo local, sin red externa\n```\n\n## Qué guarda IndexedDB (y qué no)\n\nSolo tu progreso: historial de intentos de examen, scheduling SM-2 de cada\ntarjeta, y el override de \"materia\" por documento. **El contenido nunca se\ncachea ahí** — siempre se lee de `/material/generado/`, así que regenerar un\nJSON no te hace perder nada de esto. El botón ↺ en cada documento borra solo\neste progreso local; nunca toca los archivos fuente.\n\n## Funcionalidad\n\n- **Extracción**: `npm run extraer` lee `material/entrada/*.pdf` con pdf.js\n  en Node (sin red), escribe un `.md` por página en `material/texto/` y\n  actualiza `indice.json`. Si un PDF no tiene capa de texto, lo marca\n  `requiereOCR: true` en vez de fallar. Salteo automático por hash si el PDF\n  no cambió.\n- **Resúmenes**: visor de `resumen.json` en tres vistas (Express / Por temas\n  / Conceptos clave), con cita de página en cada afirmación.\n- **Buscador (pestaña Preguntas)**: BM25 local sobre `contexto.json` — sin\n  IA, sin parafrasear: muestra los 3 fragmentos más relevantes del material\n  tal cual, con página y resaltado. Cada búsqueda se acumula en\n  `material/pendientes.json`.\n- **Exámenes**: el configurador filtra las preguntas de `examen.json` por\n  tipo, dificultad y tema (no genera nada nuevo). Modo examen de una\n  pregunta por pantalla sin volver atrás, corrección, detección de temas\n  flojos con acceso directo a repasar esas tarjetas, historial con evolución\n  del puntaje — todo igual que antes.\n- **Flashcards**: cargan desde `tarjetas.json`, mergeadas por `id` con el\n  progreso SM-2 guardado en IndexedDB. Flip 3D, repaso a pantalla completa\n  con navegación por teclado (espacio, 1-4, flechas, Esc), export CSV para\n  Anki — sin cambios.\n- **Dashboard**: métricas de progreso, gráfico semanal, accesos rápidos, y\n  un panel \"Material pendiente\" que compara `indice.json` contra\n  `material/generado/` y lista qué falta por documento.\n\n## Identidad visual\n\nSin cambios respecto de la versión anterior: base blanca impoluta, acento\nrojo carmesí (`#C8102E`) y una banda diagonal como motivo gráfico\nrecurrente — lenguaje visual propio, sin referencias a ningún club, escudo o\nmarca. Modo oscuro real con fondo carbón. Tipografía Barlow Condensed\n(títulos, mayúsculas) + Inter (cuerpo), números tabulares en métricas.\n\n## Scripts\n\n```bash\nnpm run dev       # servidor de desarrollo (sirve /material/** localmente)\nnpm run extraer   # PDF → texto + indice.json\nnpm run validar   # valida el esquema de material/generado/**\nnpm run build     # type-check + build de producción (copia material/ a dist/)\nnpm run preview   # sirve el build de producción localmente\nnpm run lint      # oxlint\n```\n\n## Restricciones (por diseño)\n\nNinguna llamada a `api.anthropic.com`, OpenAI ni ningún otro servicio de IA.\nNinguna API key se pide, guarda ni lee en ninguna forma. La app abre y\nfunciona completa sin conexión a internet.\n"
       },
       "analysis": {
         "projectType": {
-          "value": "otro",
-          "evidence": "sin heurística concluyente"
+          "value": "web-app",
+          "evidence": "dependency: react"
         },
         "primaryFramework": {
-          "value": null,
-          "evidence": "sin framework detectado en dependencias"
+          "value": "React",
+          "evidence": "dependency: react"
         },
         "runtime": {
-          "value": "C",
-          "evidence": "lenguaje dominante por bytes (endpoint /languages)"
+          "value": "Node",
+          "evidence": "manifiesto: package.json"
         },
         "database": {
           "value": null,
           "evidence": "sin base de datos detectada en dependencias"
         },
         "buildTools": {
-          "value": [],
-          "evidence": "sin herramientas de build detectadas"
+          "value": [
+            "Vite"
+          ],
+          "evidence": "archivos de configuración: Vite"
         },
         "testTools": {
           "value": [],
           "evidence": "sin herramientas de test detectadas"
         },
-        "dependencies": [],
-        "fileCount": 15,
-        "maxDepth": 2,
+        "dependencies": [
+          {
+            "name": "@tailwindcss/vite",
+            "version": "^4.3.3",
+            "type": "prod"
+          },
+          {
+            "name": "@types/papaparse",
+            "version": "^5.5.2",
+            "type": "prod"
+          },
+          {
+            "name": "idb",
+            "version": "^8.0.3",
+            "type": "prod"
+          },
+          {
+            "name": "papaparse",
+            "version": "^5.5.4",
+            "type": "prod"
+          },
+          {
+            "name": "pdfjs-dist",
+            "version": "^5.4.624",
+            "type": "prod"
+          },
+          {
+            "name": "react",
+            "version": "^19.2.8",
+            "type": "prod"
+          },
+          {
+            "name": "react-dom",
+            "version": "^19.2.8",
+            "type": "prod"
+          },
+          {
+            "name": "react-router-dom",
+            "version": "^7.18.2",
+            "type": "prod"
+          },
+          {
+            "name": "tailwindcss",
+            "version": "^4.3.3",
+            "type": "prod"
+          },
+          {
+            "name": "zustand",
+            "version": "^5.0.14",
+            "type": "prod"
+          },
+          {
+            "name": "@oxlint/binding-win32-x64-msvc",
+            "version": "^1.77.0",
+            "type": "dev"
+          },
+          {
+            "name": "@types/node",
+            "version": "^24.13.3",
+            "type": "dev"
+          },
+          {
+            "name": "@types/react",
+            "version": "^19.2.17",
+            "type": "dev"
+          },
+          {
+            "name": "@types/react-dom",
+            "version": "^19.2.3",
+            "type": "dev"
+          },
+          {
+            "name": "@vitejs/plugin-react",
+            "version": "^4.7.0",
+            "type": "dev"
+          },
+          {
+            "name": "oxlint",
+            "version": "^1.77.0",
+            "type": "dev"
+          },
+          {
+            "name": "typescript",
+            "version": "~6.0.2",
+            "type": "dev"
+          },
+          {
+            "name": "vite",
+            "version": "^6.4.3",
+            "type": "dev"
+          }
+        ],
+        "fileCount": 81,
+        "maxDepth": 3,
         "topLevelDirs": [
-          "bin",
-          "obj"
+          "material",
+          "public",
+          "scripts",
+          "src"
         ],
         "hasTests": false,
         "hasCI": false,
         "hasDocker": false,
         "hasDocs": false,
-        "daysAlive": 70,
-        "daysSinceLastPush": 68,
+        "daysAlive": 1,
+        "daysSinceLastPush": 1,
         "status": "activo"
       },
       "summary": {
-        "pitch": "Trabajo practico de analisis de un alto volumen de datos en C",
-        "summary": "Resumen generado sin LLM (ANTHROPIC_API_KEY no configurada al momento del build). Trabajo practico de analisis de un alto volumen de datos en C Estado: activo, 5 commits.",
+        "pitch": "Visor local y offline de material universitario que muestra resúmenes, exámenes y flashcards generados fuera de la app, para estudiantes sin acceso a APIs de IA pagas.",
+        "summary": "El proyecto separa la generación de contenido del consumo: la app no llama a ningún servicio de IA ni pide API keys. Un script en Node extrae texto de los PDFs colocados en material/entrada/ usando pdfjs-dist y produce archivos .md por página más un indice.json. Los artefactos de estudio (resumen.json, examen.json, tarjetas.json, contexto.json) los escribe el usuario o una IA por terminal siguiendo GENERAR.md, y un script de validación chequea su esquema. La interfaz React lee esos JSON desde /material/generado/, los presenta por documento y marca como pendiente lo que aún no existe, con el comando exacto para generarlo. IndexedDB guarda únicamente progreso propio (intentos de examen, scheduling SM-2, override de materia), nunca el contenido.",
         "highlights": [
-          "Sin evidencia adicional disponible (sin LLM)",
-          "Sin evidencia adicional disponible (sin LLM)"
+          "Separación estricta entre generación (offline, por terminal) y visualización: la app es solo lectora de /material/generado/ y no realiza llamadas de red externas.",
+          "El contrato de datos vive en src/types/material.ts y se aplica en dos puntos: el script validar.mjs y el acceso centralizado por materialClient.ts, única puerta de entrada a /material/.",
+          "Persistencia dividida por responsabilidad: contenido en archivos en disco, progreso SM-2 e historial de exámenes en IndexedDB, mergeados por id de tarjeta para que regenerar un JSON no borre el avance.",
+          "Plugin de Vite propio (vite.material-plugin.ts) que sirve /material/ en dev y preview y expone un POST local para acumular consultas en pendientes.json; polling de 2s como mecanismo de refresco."
         ],
         "techNotes": [
-          "Runtime: C",
-          "0 dependencias declaradas en manifiestos"
+          "React 19 + TypeScript (~6.0) sobre Vite 6, con Tailwind 4 vía @tailwindcss/vite y oxlint como linter en lugar de ESLint.",
+          "Estado global con Zustand (documentsStore, settingsStore, toastStore); persistencia local con idb; export de mazos a CSV para Anki con papaparse.",
+          "Extracción de PDFs con pdfjs-dist ejecutado en Node (scripts/extraer.mjs), con salteo por hash si el archivo no cambió y marcado requiereOCR cuando el PDF carece de capa de texto.",
+          "Búsqueda implementada como BM25 propio en src/lib/retrieval.ts sobre contexto.json, devolviendo fragmentos literales con página; repetición espaciada en src/lib/sm2.ts."
         ],
-        "domain": "sin-clasificar",
+        "domain": "educación",
         "keywords": [
-          "c"
+          "offline-first",
+          "bm25",
+          "sm-2",
+          "pdfjs-dist",
+          "indexeddb",
+          "plugin de vite",
+          "flashcards",
+          "contrato json"
         ],
-        "confidence": "baja"
+        "confidence": "alta"
       },
-      "size": 8.2,
-      "color": "#555555",
+      "size": 5.2,
+      "color": "#3178c6",
       "dashedBorder": false,
       "cluster": 0
     }
@@ -505,69 +602,36 @@
   "edges": [
     {
       "source": "CalculadoraMonotributo",
-      "target": "SIMON-IN-C",
-      "weight": 0.45,
-      "reasons": [
-        {
-          "kind": "lenguaje",
-          "weight": 0.2,
-          "detail": "similitud de lenguajes: 100%"
-        },
-        {
-          "kind": "topics",
-          "weight": 0.25,
-          "detail": "topics/keywords compartidos: 100%"
-        }
-      ]
+      "target": "PC_DOCTOR",
+      "weight": 0,
+      "reasons": []
     },
     {
-      "source": "CalculadoraMonotributo",
-      "target": "TrabajoPracticoENUT",
-      "weight": 0.45,
-      "reasons": [
-        {
-          "kind": "lenguaje",
-          "weight": 0.2,
-          "detail": "similitud de lenguajes: 100%"
-        },
-        {
-          "kind": "topics",
-          "weight": 0.25,
-          "detail": "topics/keywords compartidos: 100%"
-        }
-      ]
-    },
-    {
-      "source": "ITLeveling",
+      "source": "PC_DOCTOR",
       "target": "PredictorMundial",
-      "weight": 0.328,
+      "weight": 0.168,
       "reasons": [
         {
           "kind": "lenguaje",
-          "weight": 0.12816747111804735,
-          "detail": "similitud de lenguajes: 64%"
+          "weight": 0.15235215472558417,
+          "detail": "similitud de lenguajes: 76%"
         },
         {
-          "kind": "topics",
-          "weight": 0.2,
-          "detail": "topics/keywords compartidos: 80%"
+          "kind": "dependencias",
+          "weight": 0.015909090909090907,
+          "detail": "dependencias compartidas: 5%"
         }
       ]
     },
     {
-      "source": "SIMON-IN-C",
-      "target": "TrabajoPracticoENUT",
-      "weight": 0.45,
+      "source": "PredictorMundial",
+      "target": "StudyHUD",
+      "weight": 0.011,
       "reasons": [
         {
           "kind": "lenguaje",
-          "weight": 0.2,
-          "detail": "similitud de lenguajes: 100%"
-        },
-        {
-          "kind": "topics",
-          "weight": 0.25,
-          "detail": "topics/keywords compartidos: 100%"
+          "weight": 0.010915640075630196,
+          "detail": "similitud de lenguajes: 5%"
         }
       ]
     }

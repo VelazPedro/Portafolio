@@ -34,11 +34,9 @@ function App() {
   const filteredGraph = useMemo((): PortfolioGraph | null => {
     if (!graph) return null
     const ids = new Set(filteredNodes.map((n) => n.id))
-    const edges = graph.edges.filter(
-      (e) => ids.has(e.source) && ids.has(e.target) && e.weight >= filters.edgeThreshold,
-    )
+    const edges = graph.edges.filter((e) => ids.has(e.source) && ids.has(e.target))
     return { generatedAt: graph.generatedAt, nodes: filteredNodes, edges }
-  }, [graph, filteredNodes, filters.edgeThreshold])
+  }, [graph, filteredNodes])
 
   const selectedNode: GraphNode | null = useMemo(() => {
     if (!graph || !selectedId) return null
@@ -64,24 +62,26 @@ function App() {
   }
 
   return (
-    <div className="relative h-full w-full bg-bg">
-      <nav className="pointer-events-auto absolute right-4 top-4 z-10 flex gap-1 rounded-lg border border-white/10 bg-surface/90 p-1 font-mono text-xs backdrop-blur">
-        {(['grafo', 'timeline', 'lista'] as const satisfies readonly Tab[]).map((t) => (
-          <button
-            key={t}
-            type="button"
-            onClick={() => setTab(t)}
-            aria-current={tab === t}
-            className={`rounded px-3 py-1 ${tab === t ? 'bg-accent/20 text-accent' : 'text-gray-400 hover:text-gray-200'}`}
-          >
-            {t}
-          </button>
-        ))}
-      </nav>
+    <div className="flex h-full w-full flex-col bg-bg">
+      <header className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 bg-surface px-4 py-2">
+        <FilterBar filters={filters} onChange={setFilters} options={options} />
 
-      <FilterBar filters={filters} onChange={setFilters} options={options} />
+        <nav className="flex shrink-0 gap-1 rounded-lg border border-white/10 bg-bg/60 p-1 font-mono text-xs">
+          {(['grafo', 'timeline', 'lista'] as const satisfies readonly Tab[]).map((t) => (
+            <button
+              key={t}
+              type="button"
+              onClick={() => setTab(t)}
+              aria-current={tab === t}
+              className={`rounded px-3 py-1 capitalize ${tab === t ? 'bg-accent/20 text-accent' : 'text-gray-400 hover:text-gray-200'}`}
+            >
+              {t}
+            </button>
+          ))}
+        </nav>
+      </header>
 
-      <main className="h-full w-full pt-2">
+      <main className="relative min-h-0 flex-1">
         {tab === 'grafo' && (
           <ForceGraph graph={filteredGraph} selectedId={selectedId} onSelectNode={(n) => setSelectedId(n.id)} />
         )}
