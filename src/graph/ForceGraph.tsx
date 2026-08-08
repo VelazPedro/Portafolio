@@ -1,6 +1,7 @@
 import {
   useCallback,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -36,6 +37,7 @@ interface TypedForceGraphProps {
   nodeId?: string
   nodeVal?: (node: GraphNode) => number
   nodeCanvasObject?: (node: FGNodeRendered, ctx: CanvasRenderingContext2D, globalScale: number) => void
+  nodePointerAreaPaint?: (node: FGNodeRendered, color: string, ctx: CanvasRenderingContext2D, globalScale: number) => void
   linkWidth?: (link: FGLinkRendered) => number
   linkColor?: (link: FGLinkRendered) => string
   linkDirectionalParticles?: (link: FGLinkRendered) => number
@@ -123,6 +125,17 @@ function vivid(hex: string, lightness = 58): string {
   return hslToHex(h, Math.max(s, 80), lightness)
 }
 
+// Radio en unidades de mundo (no píxeles de pantalla) usado TANTO para el
+// dibujo visible como para el área de click (nodePointerAreaPaint más abajo).
+// Tienen que compartir esta misma función: el área de click por defecto de
+// react-force-graph-2d usa sqrt(val)*nodeRelSize SIN el mínimo de 10 que
+// aplicamos acá, así que para nodos chicos (val bajo) el círculo dibujado
+// queda visualmente más grande que su zona clickeable real, y clickear cerca
+// del borde falla en silencio. Si se cambia este número, cambia para los dos.
+function nodeRadius(node: GraphNode): number {
+  return Math.max(10, Math.sqrt(node.size) * 4.6)
+}
+
 interface Props {
   graph: PortfolioGraph
   selectedId: string | null
@@ -172,7 +185,7 @@ export function ForceGraph({ graph, selectedId, onSelectNode }: Props) {
       const y = node.y ?? 0
       const dimmed = neighborIds !== null && !neighborIds.has(node.id)
       const isActive = node.id === activeId
-      const radius = Math.max(10, Math.sqrt(node.size) * 4.6)
+      const radius = nodeRadius(node)
       const fillColor = vivid(node.color, 58)
       const borderColor = vivid(node.color, 78)
 
@@ -209,6 +222,19 @@ export function ForceGraph({ graph, selectedId, onSelectNode }: Props) {
     [neighborIds, activeId],
   )
 
+  // Dibuja el área de click con el mismo radio que el círculo visible
+  // (ver comentario en nodeRadius). Sin esto, react-force-graph-2d usa su
+  // propio radio por defecto para detectar clicks, que no coincide con lo
+  // que se ve en pantalla.
+  const nodePointerAreaPaint = useCallback((node: FGNodeRendered, color: string, ctx: CanvasRenderingContext2D) => {
+    const x = node.x ?? 0
+    const y = node.y ?? 0
+    ctx.beginPath()
+    ctx.arc(x, y, nodeRadius(node), 0, 2 * Math.PI)
+    ctx.fillStyle = color
+    ctx.fill()
+  }, [])
+
   const isLinkActive = useCallback(
     (link: FGLinkRendered) => {
       if (!neighborIds) return true
@@ -227,24 +253,45 @@ export function ForceGraph({ graph, selectedId, onSelectNode }: Props) {
   const hasFittedRef = useRef(false)
   const nodeIdsKey = graph.nodes.map((n) => n.id).join(',')
 
-  useEffect(() => {
+  // El grafo tarda ~150 ticks animados (unos 2-3s en pantalla) en asentarse
+  // la primera vez, y durante toda esa ventana los nodos se siguen moviendo.
+  // Un click hecho en ese lapso apunta a donde el nodo ESTABA, no a donde
+  // termina, y se percibe como "el grafo no responde al click" — react-force-graph
+  // no expone ningún método para saltar ese asentamiento de forma sincrónica
+  // (tickFrame/isEngineRunning existen en la librería pero el wrapper de React
+  // no los reenvía). La solución robusta es no dejar clickear nada hasta que
+  // onEngineStop confirme que la simulación realmente terminó: `ready` gatea
+  // pointer-events sobre el propio grafo, así nunca hay ventana para clickear
+  // un nodo en movimiento. No sacar este gate sin reemplazarlo por algo
+  // equivalente.
+  const [ready, setReady] = useState(false)
+
+  useLayoutEffect(() => {
     hasFittedRef.current = false
+    setReady(false)
   }, [nodeIdsKey])
 
   // Con pocos nodos, la repulsión/distancia por defecto de d3-force los deja
-  // pegados o superpuestos. Se separan a mano y se reinicia la simulación.
-  useEffect(() => {
+  // pegados o superpuestos, así que se separan a mano y se reinicia la
+  // simulación con esa fuerza. useLayoutEffect (no useEffect) para que corra
+  // antes del primer tick real (que llega recién en el siguiente frame).
+  useLayoutEffect(() => {
     if (reducedMotion) return
-    fgRef.current?.d3Force('charge')?.strength?.(-260)
-    fgRef.current?.d3Force('link')?.distance?.(150)
-    fgRef.current?.d3ReheatSimulation()
+    const fg = fgRef.current
+    if (!fg) return
+    fg.d3Force('charge')?.strength?.(-260)
+    fg.d3Force('link')?.distance?.(150)
+    fg.d3ReheatSimulation()
   }, [nodeIdsKey, reducedMotion])
 
   const handleEngineStop = useCallback(() => {
+    setReady(true)
     if (hasFittedRef.current) return
     hasFittedRef.current = true
     fgRef.current?.zoomToFit(400, 80)
   }, [])
+
+  const interactive = reducedMotion || ready
 
   const nodeButtonsRef = useRef<Array<HTMLButtonElement | null>>([])
 
@@ -266,27 +313,36 @@ export function ForceGraph({ graph, selectedId, onSelectNode }: Props) {
 
   return (
     <div className="relative h-full w-full">
-      <ForceGraph2D
-        ref={fgRef}
-        graphData={graphData}
-        backgroundColor="#0b0d10"
-        nodeId="id"
-        nodeVal={(node) => node.size}
-        nodeCanvasObject={nodeCanvasObject}
-        linkWidth={(link) => (isLinkActive(link) ? 5 : 3)}
-        linkColor={linkColor}
-        linkDirectionalParticles={(link) => (isLinkActive(link) ? 3 : 0)}
-        linkDirectionalParticleWidth={3}
-        linkDirectionalParticleColor={() => '#5eead4'}
-        linkDirectionalParticleSpeed={0.004}
-        onNodeHover={(node) => setHoveredId(node ? node.id : null)}
-        onNodeClick={(node) => onSelectNode(node)}
-        onEngineStop={handleEngineStop}
-        cooldownTicks={reducedMotion ? 0 : 150}
-        warmupTicks={reducedMotion ? 0 : undefined}
-        minZoom={0.3}
-        maxZoom={8}
-      />
+      <div className={interactive ? '' : 'pointer-events-none'}>
+        <ForceGraph2D
+          ref={fgRef}
+          graphData={graphData}
+          backgroundColor="#0b0d10"
+          nodeId="id"
+          nodeVal={(node) => node.size}
+          nodeCanvasObject={nodeCanvasObject}
+          nodePointerAreaPaint={nodePointerAreaPaint}
+          linkWidth={(link) => (isLinkActive(link) ? 5 : 3)}
+          linkColor={linkColor}
+          linkDirectionalParticles={(link) => (isLinkActive(link) ? 3 : 0)}
+          linkDirectionalParticleWidth={3}
+          linkDirectionalParticleColor={() => '#5eead4'}
+          linkDirectionalParticleSpeed={0.004}
+          onNodeHover={(node) => setHoveredId(node ? node.id : null)}
+          onNodeClick={(node) => onSelectNode(node)}
+          onEngineStop={handleEngineStop}
+          cooldownTicks={reducedMotion ? 0 : 150}
+          warmupTicks={reducedMotion ? 0 : undefined}
+          minZoom={0.3}
+          maxZoom={8}
+        />
+      </div>
+
+      {!interactive && (
+        <div className="pointer-events-none absolute bottom-3 left-3 rounded bg-surface/80 px-2 py-1 font-mono text-[10px] text-gray-400">
+          acomodando nodos…
+        </div>
+      )}
 
       {/* Navegación por teclado: lista accesible oculta visualmente, equivalente a recorrer el grafo con Tab/flechas */}
       <ul className="sr-only" aria-label="Navegación por teclado entre proyectos del grafo">
