@@ -7,6 +7,7 @@ import {
   useState,
   type ComponentType,
   type KeyboardEvent,
+  type MouseEvent as ReactMouseEvent,
   type Ref,
 } from 'react'
 import ForceGraph2DImpl from 'react-force-graph-2d'
@@ -22,6 +23,7 @@ interface FGMethods {
   centerAt(x?: number, y?: number, durationMs?: number): void
   d3Force(name: string): D3Force | undefined
   d3ReheatSimulation(): void
+  screen2GraphCoords(x: number, y: number): { x: number; y: number }
 }
 
 type FGNodeRendered = GraphNode & { x?: number; y?: number; fx?: number; fy?: number }
@@ -245,6 +247,55 @@ export function ForceGraph({ graph, selectedId, onSelectNode }: Props) {
     [neighborIds],
   )
 
+  // Detección de click/hover propia, independiente del picking interno de
+  // react-force-graph-2d (que lee píxeles de un canvas oculto para saber qué
+  // nodo tocaste). Algunos navegadores/extensiones de privacidad bloquean o
+  // alteran esa lectura como medida anti-fingerprinting: el dibujo se ve
+  // perfecto pero ningún click abre nunca nada, y no hay forma de detectarlo
+  // desde el código. screen2GraphCoords es pura transformación de zoom/pan
+  // (sin leer píxeles), así que este cálculo funciona siempre. onNodeClick/
+  // onNodeHover de la librería quedan igual como respaldo, pero esta es la
+  // vía que de verdad hay que sostener.
+  const containerRef = useRef<HTMLDivElement | null>(null)
+
+  const findNodeAtPoint = useCallback(
+    (clientX: number, clientY: number): GraphNode | null => {
+      const fg = fgRef.current
+      const el = containerRef.current
+      if (!fg || !el) return null
+      const rect = el.getBoundingClientRect()
+      const { x: gx, y: gy } = fg.screen2GraphCoords(clientX - rect.left, clientY - rect.top)
+      let closest: GraphNode | null = null
+      let closestDist = Infinity
+      for (const node of graphData.nodes as FGNodeRendered[]) {
+        if (node.x === undefined || node.y === undefined) continue
+        const dist = Math.hypot(gx - node.x, gy - node.y)
+        if (dist <= nodeRadius(node) && dist < closestDist) {
+          closestDist = dist
+          closest = node
+        }
+      }
+      return closest
+    },
+    [graphData],
+  )
+
+  const handleContainerClick = useCallback(
+    (e: ReactMouseEvent<HTMLDivElement>) => {
+      const node = findNodeAtPoint(e.clientX, e.clientY)
+      if (node) onSelectNode(node)
+    },
+    [findNodeAtPoint, onSelectNode],
+  )
+
+  const handleContainerMouseMove = useCallback(
+    (e: ReactMouseEvent<HTMLDivElement>) => {
+      const node = findNodeAtPoint(e.clientX, e.clientY)
+      setHoveredId(node ? node.id : null)
+    },
+    [findNodeAtPoint],
+  )
+
   const linkColor = useCallback(
     (link: FGLinkRendered) => (isLinkActive(link) ? 'rgba(94, 234, 212, 0.9)' : 'rgba(180, 195, 215, 0.55)'),
     [isLinkActive],
@@ -313,7 +364,14 @@ export function ForceGraph({ graph, selectedId, onSelectNode }: Props) {
 
   return (
     <div className="relative h-full w-full">
-      <div className={interactive ? '' : 'pointer-events-none'}>
+      <div
+        ref={containerRef}
+        className={interactive ? '' : 'pointer-events-none'}
+        style={{ cursor: hoveredId ? 'pointer' : 'default' }}
+        onClick={handleContainerClick}
+        onMouseMove={handleContainerMouseMove}
+        onMouseLeave={() => setHoveredId(null)}
+      >
         <ForceGraph2D
           ref={fgRef}
           graphData={graphData}
