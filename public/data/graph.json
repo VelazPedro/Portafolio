@@ -1,0 +1,175 @@
+{
+  "generatedAt": "2026-08-07T00:00:00.000Z",
+  "nodes": [
+    {
+      "id": "grafo-portafolio",
+      "repo": {
+        "name": "grafo-portafolio",
+        "description": "Portafolio interactivo de repositorios como grafo.",
+        "url": "https://github.com/VelazPedro/grafo-portafolio",
+        "homepage": null,
+        "topics": ["portfolio", "graph", "react"],
+        "license": "MIT",
+        "createdAt": "2026-01-10T00:00:00Z",
+        "pushedAt": "2026-08-07T00:00:00Z",
+        "commitCount": 42,
+        "stars": 3,
+        "forks": 0,
+        "languages": { "TypeScript": 90000, "CSS": 5000 },
+        "defaultBranch": "main"
+      },
+      "analysis": {
+        "projectType": { "value": "web-app", "evidence": "vite.config.ts + react en package.json" },
+        "primaryFramework": { "value": "React", "evidence": "dependency: react" },
+        "runtime": { "value": "Node", "evidence": "package.json engines" },
+        "database": { "value": null, "evidence": "sin manifiesto de DB" },
+        "buildTools": { "value": ["Vite"], "evidence": "vite.config.ts" },
+        "testTools": { "value": ["Vitest"], "evidence": "devDependency: vitest" },
+        "dependencies": [{ "name": "react", "version": "^18.3.1", "type": "prod" }],
+        "fileCount": 38,
+        "maxDepth": 4,
+        "topLevelDirs": ["src", "scripts", "config", "public"],
+        "hasTests": true,
+        "hasCI": false,
+        "hasDocker": false,
+        "hasDocs": true,
+        "daysAlive": 30,
+        "daysSinceLastPush": 0,
+        "status": "activo"
+      },
+      "summary": {
+        "pitch": "Portafolio que mapea repos propios como grafo de relaciones técnicas.",
+        "summary": "Ingesta metadatos de GitHub, infiere stack por manifiestos y genera un grafo estático. Pensado como pieza de portafolio sin backend.",
+        "highlights": ["Análisis 100% estático, sin ejecutar código de terceros", "Grafo con pesos configurables por tipo de relación"],
+        "techNotes": ["react-force-graph-2d sobre canvas para 60fps", "Pipeline idempotente cacheado por SHA"],
+        "domain": "devtools",
+        "keywords": ["grafo", "github", "portafolio", "análisis estático"],
+        "confidence": "alta"
+      },
+      "size": 12,
+      "color": "#3178c6",
+      "dashedBorder": false,
+      "cluster": 0
+    },
+    {
+      "id": "cli-utils",
+      "repo": {
+        "name": "cli-utils",
+        "description": "Colección de utilidades CLI en Node.",
+        "url": "https://github.com/VelazPedro/cli-utils",
+        "homepage": null,
+        "topics": ["cli", "node"],
+        "license": null,
+        "createdAt": "2025-06-01T00:00:00Z",
+        "pushedAt": "2025-08-01T00:00:00Z",
+        "commitCount": 15,
+        "stars": 1,
+        "forks": 0,
+        "languages": { "TypeScript": 20000 },
+        "defaultBranch": "main"
+      },
+      "analysis": {
+        "projectType": { "value": "cli", "evidence": "bin en package.json" },
+        "primaryFramework": { "value": null, "evidence": "sin framework" },
+        "runtime": { "value": "Node", "evidence": "package.json" },
+        "database": { "value": null, "evidence": "no aplica" },
+        "buildTools": { "value": ["tsx"], "evidence": "devDependency: tsx" },
+        "testTools": { "value": [], "evidence": "sin tests detectados" },
+        "dependencies": [{ "name": "zod", "version": "^3.24.1", "type": "prod" }],
+        "fileCount": 12,
+        "maxDepth": 2,
+        "topLevelDirs": ["src"],
+        "hasTests": false,
+        "hasCI": false,
+        "hasDocker": false,
+        "hasDocs": false,
+        "daysAlive": 400,
+        "daysSinceLastPush": 380,
+        "status": "pausado"
+      },
+      "summary": {
+        "pitch": "Herramientas de línea de comandos para tareas repetitivas de desarrollo.",
+        "summary": "Conjunto de scripts CLI empaquetados con tsx. Sin suite de tests ni CI configurado. Uso personal, bajo mantenimiento activo.",
+        "highlights": ["Validación de inputs con zod"],
+        "techNotes": ["Ejecutado vía tsx sin paso de build previo"],
+        "domain": "devtools",
+        "keywords": ["cli", "node", "automatización"],
+        "confidence": "media"
+      },
+      "size": 6,
+      "color": "#3178c6",
+      "dashedBorder": true,
+      "cluster": 0
+    },
+    {
+      "id": "data-pipeline",
+      "repo": {
+        "name": "data-pipeline",
+        "description": "Pipeline de procesamiento de datos en Python.",
+        "url": "https://github.com/VelazPedro/data-pipeline",
+        "homepage": null,
+        "topics": ["data", "python", "etl"],
+        "license": "MIT",
+        "createdAt": "2024-11-01T00:00:00Z",
+        "pushedAt": "2026-07-01T00:00:00Z",
+        "commitCount": 88,
+        "stars": 5,
+        "forks": 2,
+        "languages": { "Python": 60000 },
+        "defaultBranch": "main"
+      },
+      "analysis": {
+        "projectType": { "value": "script", "evidence": "sin entrypoint web" },
+        "primaryFramework": { "value": "pandas", "evidence": "requirements.txt" },
+        "runtime": { "value": "Python", "evidence": "requirements.txt" },
+        "database": { "value": "PostgreSQL", "evidence": "dependency: psycopg2" },
+        "buildTools": { "value": [], "evidence": "no aplica" },
+        "testTools": { "value": ["pytest"], "evidence": "requirements.txt" },
+        "dependencies": [{ "name": "pandas", "version": "2.2.0", "type": "prod" }],
+        "fileCount": 54,
+        "maxDepth": 3,
+        "topLevelDirs": ["etl", "tests"],
+        "hasTests": true,
+        "hasCI": true,
+        "hasDocker": true,
+        "hasDocs": true,
+        "daysAlive": 640,
+        "daysSinceLastPush": 37,
+        "status": "activo"
+      },
+      "summary": {
+        "pitch": "Pipeline ETL para normalizar datasets públicos.",
+        "summary": "Procesa datasets crudos y los carga a PostgreSQL. Incluye tests con pytest y Dockerfile para reproducibilidad.",
+        "highlights": ["Dockerizado", "CI configurado con pytest"],
+        "techNotes": ["pandas para transformación", "psycopg2 para carga a Postgres"],
+        "domain": "datos",
+        "keywords": ["etl", "python", "datos", "postgresql"],
+        "confidence": "alta"
+      },
+      "size": 9,
+      "color": "#3572A5",
+      "dashedBorder": false,
+      "cluster": 1
+    }
+  ],
+  "edges": [
+    {
+      "source": "grafo-portafolio",
+      "target": "cli-utils",
+      "weight": 0.42,
+      "reasons": [
+        { "kind": "lenguaje", "weight": 0.2, "detail": "ambos 100% TypeScript" },
+        { "kind": "dominio", "weight": 0.1, "detail": "dominio compartido: devtools" },
+        { "kind": "topics", "weight": 0.12, "detail": "sin topics comunes directos, keywords cercanas" }
+      ]
+    },
+    {
+      "source": "data-pipeline",
+      "target": "grafo-portafolio",
+      "weight": 0.25,
+      "reasons": [
+        { "kind": "topics", "weight": 0.25, "detail": "ambos usan \"análisis\" como keyword" }
+      ]
+    }
+  ]
+}
