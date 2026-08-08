@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-08T00:13:31.420Z",
+  "generatedAt": "2026-08-08T00:18:41.038Z",
   "nodes": [
     {
       "id": "CalculadoraMonotributo",
@@ -18,7 +18,8 @@
         "languages": {
           "C": 16674
         },
-        "defaultBranch": "main"
+        "defaultBranch": "main",
+        "readme": "# CalculadoraMonotributo\n\nCalculadora de monotributo argentino con los valores vigentes desde febrero 2026 (fuente: ARCA, actualización IPC semestre 2/2025).\n\nHay dos versiones que comparten exactamente la misma tabla y la misma lógica de cálculo.\n\n## Versión C (consola)\n\nEl programa original. Se puede ejecutar sin muchas complicaciones tan solo con su `.exe`.\n\n```\ngcc -o monotributo monotributo.c -lm\n./monotributo\n```\n\n## Versión web\n\n`docs/index.html` — un único archivo HTML, sin dependencias ni build. Se abre con doble clic o se publica en cualquier hosting estático.\n\nPara publicarlo en GitHub Pages: **Settings → Pages → Source: rama `main`, carpeta `/docs`**.\n\nCubre las mismas cuatro funciones del menú de consola:\n\n- **Mi categoría** — cálculo en vivo, con selector mensual/anual y servicios/venta de bienes. Muestra la cuota total, el desglose (impuesto integrado + SIPA + obra social), un medidor de uso del tope y la escala A→K.\n- **Recategorización** — carga de los últimos 12 meses y comparación contra la categoría actual, con la diferencia de cuota en pesos.\n- **Tabla completa** — las 11 categorías, filtrables por tipo de actividad.\n- **Cómo y cuándo** — fechas de vencimiento y pasos para recategorizarse en AFIP.\n\n## Actualizar los valores\n\nCada recategorización ARCA publica una tabla nueva. Hay que reemplazarla en dos lugares:\n\n- `monotributo.c` → la constante `TABLA`\n- `docs/index.html` → la constante `TABLA` del `<script>` (mismos campos, mismo orden)\n"
       },
       "analysis": {
         "projectType": {
@@ -79,7 +80,7 @@
       "size": 9.9,
       "color": "#555555",
       "dashedBorder": false,
-      "cluster": 0
+      "cluster": 1
     },
     {
       "id": "ITLeveling",
@@ -102,7 +103,8 @@
           "Python": 2220,
           "PowerShell": 1153
         },
-        "defaultBranch": "main"
+        "defaultBranch": "main",
+        "readme": "# IT Leveling\n\nDashboard de gamificación para soporte IT: cargás tickets y el sistema calcula\nsolo la experiencia, el nivel y las seis estadísticas del operador.\n\n## Cómo ejecutarlo\n\n### Como aplicación de escritorio (.exe)\n\n`dist\\IT Leveling.exe` es un único archivo portable: doble clic y abre en su propia\nventana, sin navegador ni URL que escribir. Pesa ~14 MB y no necesita Python instalado\nen la máquina donde corre.\n\nPara recompilarlo después de tocar el código:\n\n```bash\npython -m pip install pywebview pyinstaller\n```\n\n```bash\npowershell -ExecutionPolicy Bypass -File build.ps1\n```\n\nDetalles del empaquetado ([main.py](main.py)):\n\n- Usa **WebView2** (el motor de Edge, ya viene con Windows 10/11), por eso el .exe es chico.\n- Adentro levanta un servidor local en `127.0.0.1:47820`, pero eso es transparente: la app\n  lo arranca y lo cierra sola. El puerto es fijo a propósito, porque IndexedDB separa los\n  datos por origen y un puerto al azar borraría el progreso en cada arranque.\n- Los datos van a `%LOCALAPPDATA%\\ITLeveling`, así que sobreviven a cerrar la app y a\n  recompilar el .exe. Para empezar de cero, borrar esa carpeta.\n- Si el puerto está ocupado (típicamente porque ya hay una ventana abierta), avisa con un\n  cartel en vez de fallar en silencio.\n\n### En el navegador (desarrollo)\n\nUsa módulos ES, así que necesita servirse por HTTP (abrirlo con doble clic no alcanza).\n\n```bash\npython -m http.server 5173\n```\n\nDespués entrar a `http://localhost:5173`.\n\n## Estructura\n\n| Archivo | Qué hace |\n|---|---|\n| `main.py` | Envoltorio de escritorio: ventana nativa + servidor interno en puerto fijo. |\n| `build.ps1` | Compila el `.exe` de un solo archivo con PyInstaller. |\n| `index.html` | Estructura del dashboard y los dos modales (carga de ticket / subida de nivel). |\n| `css/styles.css` | Estética: degradé azul, bordes duros, sin radios, scanlines CRT. |\n| `js/db.js` | Base de datos local (IndexedDB): tablas `usuarios` y `tickets`. Sin servidor ni conexión. |\n| `js/config.js` | Todo lo parametrizable: stats, tipos de ticket, urgencias, roles, TDR, rangos, topes y curva de XP. |\n| `js/pixelart.js` | Sprites dibujados como grillas de caracteres, convertidos a SVG. Sin imágenes externas. |\n| `js/motor.js` | Cálculo puro: ticket → deltas de cada estadística + XP. |\n| `js/estado.js` | Usuario, nivel, estadísticas, historial, persistencia y armado del informe automático. |\n| `js/ui.js` | Pintado del dashboard. |\n| `js/app.js` | Une todo y maneja los eventos. |\n\n## Base de datos y sesiones\n\nToda la información vive en **IndexedDB**, la base que trae el navegador: es una base\nreal (tablas, índices, transacciones) que corre 100% en la máquina, sin servidor ni internet.\n\n- Tabla `usuarios` — un registro por personaje, con clave el nombre normalizado\n  (mayúsculas y sin espacios de más, así \"pablo\", \"Pablo \" y \"PABLO\" son el mismo).\n  Guarda nivel, XP, XP total acumulada, las seis estadísticas, tickets totales y el último informe.\n- Tabla `tickets` — id autoincremental, índices por usuario y por fecha. Guarda los datos\n  cargados más el `ProgresoStatxTicket` (delta de cada estadística) y la XP que dio.\n\nAntes de entrar, la pantalla de ingreso pide el nombre. Si ya existe, se recupera el\nprogreso tal cual quedó; si no, se crea el personaje en nivel 1. Debajo aparecen los\npersonajes guardados para entrar de un clic. Si venías de la versión anterior con partida\nen localStorage, se importa automáticamente la primera vez.\n\n## Ventanas del menú\n\nEl botón de menú (arriba a la izquierda) abre:\n\n- **CLASIFICACIÓN** — tabla con todos los personajes creados, ordenados por nivel y después\n  por XP total, con rango y cantidad de tickets. Tu fila queda resaltada.\n- **TICKETS** — compilado de todos los tickets cargados, del más nuevo al más viejo, con el\n  detalle completo: categoría y dificultad, demora real contra la esperada, urgencia, rol\n  de quien lo creó, TDR, nivel resultante y cuánto movió cada estadística. Se puede filtrar\n  entre los tuyos y los de todos los personajes.\n- **CAMBIAR USUARIO** — guarda y vuelve a la pantalla de ingreso.\n\n## Cómo se calculan las estadísticas\n\nCada ticket aporta: categoría (dificultad e importancia), demora real, urgencia,\nrol de quien lo creó y TDR (cómo llegó: Jarvis, asignado, derivado o voluntario).\n\nEl motor compara la demora contra un tiempo esperado (referencia del tipo ajustada\npor urgencia) y de ahí sale un rendimiento entre -1.6 y 1.6 que alimenta cada stat:\n\n- **Velocidad** — rendimiento contra el tiempo esperado, amplificado por la urgencia.\n- **Confianza** — importancia del pedido cumplido en término; fallar en algo importante resta más.\n- **Investigación** — sube con la dificultad; extra si además llevó tiempo; resta si un ticket trivial se estiró.\n- **Comunicación** — derivaciones, roles altos y urgencias críticas.\n- **Efectividad** — resultado global del ticket.\n- **Voluntario** — sólo suma cuando el ticket se tomó por decisión propia. Sin tope.\n\nNingún delta supera ±8/+10 por ticket, y ninguna stat baja de 0.\n\n## Nivel y topes\n\n- Nivel máximo: 100. XP para el próximo nivel: `80 + (nivel - 1) * 20`.\n- Tope de stats: `20 + (nivel - 1) * 2` (nivel 1 = 20, nivel 100 = 218). Voluntario no tiene tope.\n- Al subir de nivel aparece el panel dorado con nivel anterior, nuevo, rango y tope nuevo.\n\n## Rangos\n\n| Nivel | Rango |\n|---|---|\n| 100 | REGEN DE RAFA |\n| 81-99 | REFERENTE DE FACTO |\n| 66-80 | SOPORTE DE JERARQUÍA |\n| 51-65 | REY DE LOS WACHINES |\n| 36-50 | TIPO DE MEGATECH |\n| 21-35 | SOPORTE NIVEL -1 |\n| 11-20 | TIPO QUE RESUELVE |\n| 1-10 | RANDOM |\n\n## Utilidades de consola\n\n```js\nITL.estado()               // personaje con la sesión abierta\nITL.usuarios()             // todos los personajes de la base\nITL.tickets()              // todos los tickets de la base\nITL.borrarUsuario('PABLO') // borra un personaje y sus tickets\n```\n"
       },
       "analysis": {
         "projectType": {
@@ -169,7 +171,7 @@
       "size": 3.4,
       "color": "#f1e05a",
       "dashedBorder": false,
-      "cluster": 1
+      "cluster": 0
     },
     {
       "id": "PredictorMundial",
@@ -191,7 +193,8 @@
           "JavaScript": 12120,
           "HTML": 4968
         },
-        "defaultBranch": "main"
+        "defaultBranch": "main",
+        "readme": "\n\nObtiene datos históricos de resultados mundialistas desde Wikipedia y predice el ganador de cada partido del Mundial 2026 en base a puntaje histórico acumulado y el resultado de los partidos desde la finalización del último mundial.\nPosteriormente, espero acceder a una API del ranking fifa para también basar el puntaje conseguido por partido en la posición de la selección en el ranking y hacer de esta simulación algo más preciso.\n# Requiere lo siguiente:\n- Python 3.10+\n- pip install pandas lxml beautifulsoup4\n\n"
       },
       "analysis": {
         "projectType": {
@@ -332,7 +335,7 @@
       "size": 10.4,
       "color": "#3572A5",
       "dashedBorder": false,
-      "cluster": 1
+      "cluster": 0
     },
     {
       "id": "SIMON-IN-C",
@@ -351,7 +354,8 @@
         "languages": {
           "C": 54307
         },
-        "defaultBranch": "main"
+        "defaultBranch": "main",
+        "readme": "##  Attention\n\nThis project requires the following libraries to compile correctly:\n\n- **SDL2** ≥ 2.32.8  \n- **SDL2_ttf** ≥ 2.24.0  \n- **SDL2_mixer** ≥ 2.8.1  \n\nYou can link them according to your preferred IDE or build system.  \nFor **Code::Blocks**, version **20.03 or higher** is recommended to ensure proper linking.\n\n###  Build Instructions\n\n1. Install the required SDL2 libraries listed above.\n2. Open the project in your IDE (e.g., Code::Blocks or VSCode).\n3. Link the libraries and include directories according to your setup.\n4. Build and run the project.\n"
       },
       "analysis": {
         "projectType": {
@@ -413,7 +417,7 @@
       "size": 5.2,
       "color": "#555555",
       "dashedBorder": true,
-      "cluster": 0
+      "cluster": 1
     },
     {
       "id": "TrabajoPracticoENUT",
@@ -432,7 +436,8 @@
         "languages": {
           "C": 18178
         },
-        "defaultBranch": "main"
+        "defaultBranch": "main",
+        "readme": "# TrabajoPracticoENUT\nTrabajo practico de analisis de un alto volumen de datos en C\n"
       },
       "analysis": {
         "projectType": {
@@ -494,7 +499,7 @@
       "size": 8.2,
       "color": "#555555",
       "dashedBorder": false,
-      "cluster": 0
+      "cluster": 1
     }
   ],
   "edges": [

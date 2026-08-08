@@ -70,6 +70,7 @@ export const repoMetaSchema = z.object({
   forks: z.number().int().nonnegative(),
   languages: z.record(z.string(), z.number()),
   defaultBranch: z.string(),
+  readme: z.string().nullable(),
 })
 
 export const graphNodeSchema = z.object({

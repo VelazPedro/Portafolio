@@ -136,6 +136,7 @@ function buildNode(bundle: RepoBundle, cluster: number): GraphNode {
       forks: bundle.raw.meta.forks,
       languages: bundle.raw.languages,
       defaultBranch: bundle.raw.meta.defaultBranch,
+      readme: bundle.raw.readme,
     },
     analysis: bundle.analysis,
     summary: bundle.summary,
