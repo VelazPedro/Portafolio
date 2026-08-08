@@ -262,7 +262,7 @@ async function fetchOneRepo(octokit: Octokit, owner: string, name: string): Prom
   console.log(`[ok] ${name}: ${filePaths.length} archivos, ${manifests.length} manifiestos, ${commitCount} commits`)
 }
 
-async function main(): Promise<void> {
+export async function main(): Promise<void> {
   const token = process.env.GITHUB_TOKEN
   if (!token) {
     console.warn(

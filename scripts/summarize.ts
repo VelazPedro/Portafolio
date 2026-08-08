@@ -143,7 +143,7 @@ async function summarizeOne(client: Anthropic, repoName: string): Promise<void> 
   console.log(`[ok] ${repoName}: confidence=${summary.confidence}`)
 }
 
-async function main(): Promise<void> {
+export async function main(): Promise<void> {
   const apiKey = process.env.ANTHROPIC_API_KEY
   if (!apiKey) {
     console.error('ANTHROPIC_API_KEY no definido. Cargalo en .env.local (ver .env.local.example).')

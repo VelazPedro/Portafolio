@@ -441,7 +441,7 @@ export function analyzeRepo(raw: RawRepoData): RepoAnalysis {
 
 // ---- Orquestación ----
 
-async function main(): Promise<void> {
+export async function main(): Promise<void> {
   await mkdir(ANALYZED_DIR, { recursive: true })
   let files: string[]
   try {

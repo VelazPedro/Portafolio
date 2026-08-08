@@ -1,174 +1,569 @@
 {
-  "generatedAt": "2026-08-07T00:00:00.000Z",
+  "generatedAt": "2026-08-08T00:13:31.420Z",
   "nodes": [
     {
-      "id": "grafo-portafolio",
+      "id": "CalculadoraMonotributo",
       "repo": {
-        "name": "grafo-portafolio",
-        "description": "Portafolio interactivo de repositorios como grafo.",
-        "url": "https://github.com/VelazPedro/grafo-portafolio",
+        "name": "CalculadoraMonotributo",
+        "description": "Calculadora de monotributo en C. Proximamente, su versión en Python con acceso a una API que la mantenga al día.",
+        "url": "https://github.com/VelazPedro/CalculadoraMonotributo",
         "homepage": null,
-        "topics": ["portfolio", "graph", "react"],
-        "license": "MIT",
-        "createdAt": "2026-01-10T00:00:00Z",
-        "pushedAt": "2026-08-07T00:00:00Z",
-        "commitCount": 42,
-        "stars": 3,
+        "topics": [],
+        "license": null,
+        "createdAt": "2026-06-05T22:39:12Z",
+        "pushedAt": "2026-08-07T16:42:31Z",
+        "commitCount": 8,
+        "stars": 0,
         "forks": 0,
-        "languages": { "TypeScript": 90000, "CSS": 5000 },
+        "languages": {
+          "C": 16674
+        },
         "defaultBranch": "main"
       },
       "analysis": {
-        "projectType": { "value": "web-app", "evidence": "vite.config.ts + react en package.json" },
-        "primaryFramework": { "value": "React", "evidence": "dependency: react" },
-        "runtime": { "value": "Node", "evidence": "package.json engines" },
-        "database": { "value": null, "evidence": "sin manifiesto de DB" },
-        "buildTools": { "value": ["Vite"], "evidence": "vite.config.ts" },
-        "testTools": { "value": ["Vitest"], "evidence": "devDependency: vitest" },
-        "dependencies": [{ "name": "react", "version": "^18.3.1", "type": "prod" }],
-        "fileCount": 38,
-        "maxDepth": 4,
-        "topLevelDirs": ["src", "scripts", "config", "public"],
-        "hasTests": true,
+        "projectType": {
+          "value": "otro",
+          "evidence": "sin heurística concluyente"
+        },
+        "primaryFramework": {
+          "value": null,
+          "evidence": "sin framework detectado en dependencias"
+        },
+        "runtime": {
+          "value": "C",
+          "evidence": "lenguaje dominante por bytes (endpoint /languages)"
+        },
+        "database": {
+          "value": null,
+          "evidence": "sin base de datos detectada en dependencias"
+        },
+        "buildTools": {
+          "value": [],
+          "evidence": "sin herramientas de build detectadas"
+        },
+        "testTools": {
+          "value": [],
+          "evidence": "sin herramientas de test detectadas"
+        },
+        "dependencies": [],
+        "fileCount": 5,
+        "maxDepth": 1,
+        "topLevelDirs": [
+          "docs"
+        ],
+        "hasTests": false,
         "hasCI": false,
         "hasDocker": false,
         "hasDocs": true,
-        "daysAlive": 30,
+        "daysAlive": 63,
         "daysSinceLastPush": 0,
         "status": "activo"
       },
       "summary": {
-        "pitch": "Portafolio que mapea repos propios como grafo de relaciones técnicas.",
-        "summary": "Ingesta metadatos de GitHub, infiere stack por manifiestos y genera un grafo estático. Pensado como pieza de portafolio sin backend.",
-        "highlights": ["Análisis 100% estático, sin ejecutar código de terceros", "Grafo con pesos configurables por tipo de relación"],
-        "techNotes": ["react-force-graph-2d sobre canvas para 60fps", "Pipeline idempotente cacheado por SHA"],
-        "domain": "devtools",
-        "keywords": ["grafo", "github", "portafolio", "análisis estático"],
-        "confidence": "alta"
+        "pitch": "Calculadora de monotributo en C. Proximamente, su versión en Python con acceso a una API que la mantenga al día.",
+        "summary": "Resumen generado sin LLM (ANTHROPIC_API_KEY no configurada al momento del build). Calculadora de monotributo en C. Proximamente, su versión en Python con acceso a una API que la mantenga al día. Estado: activo, 8 commits.",
+        "highlights": [
+          "Sin evidencia adicional disponible (sin LLM)",
+          "Sin evidencia adicional disponible (sin LLM)"
+        ],
+        "techNotes": [
+          "Runtime: C",
+          "0 dependencias declaradas en manifiestos"
+        ],
+        "domain": "sin-clasificar",
+        "keywords": [
+          "c"
+        ],
+        "confidence": "baja"
       },
-      "size": 12,
-      "color": "#3178c6",
+      "size": 9.9,
+      "color": "#555555",
       "dashedBorder": false,
       "cluster": 0
     },
     {
-      "id": "cli-utils",
+      "id": "ITLeveling",
       "repo": {
-        "name": "cli-utils",
-        "description": "Colección de utilidades CLI en Node.",
-        "url": "https://github.com/VelazPedro/cli-utils",
+        "name": "ITLeveling",
+        "description": null,
+        "url": "https://github.com/VelazPedro/ITLeveling",
         "homepage": null,
-        "topics": ["cli", "node"],
+        "topics": [],
         "license": null,
-        "createdAt": "2025-06-01T00:00:00Z",
-        "pushedAt": "2025-08-01T00:00:00Z",
-        "commitCount": 15,
-        "stars": 1,
+        "createdAt": "2026-08-05T18:36:37Z",
+        "pushedAt": "2026-08-05T18:43:55Z",
+        "commitCount": 1,
+        "stars": 0,
         "forks": 0,
-        "languages": { "TypeScript": 20000 },
+        "languages": {
+          "JavaScript": 46506,
+          "CSS": 16713,
+          "HTML": 8589,
+          "Python": 2220,
+          "PowerShell": 1153
+        },
         "defaultBranch": "main"
       },
       "analysis": {
-        "projectType": { "value": "cli", "evidence": "bin en package.json" },
-        "primaryFramework": { "value": null, "evidence": "sin framework" },
-        "runtime": { "value": "Node", "evidence": "package.json" },
-        "database": { "value": null, "evidence": "no aplica" },
-        "buildTools": { "value": ["tsx"], "evidence": "devDependency: tsx" },
-        "testTools": { "value": [], "evidence": "sin tests detectados" },
-        "dependencies": [{ "name": "zod", "version": "^3.24.1", "type": "prod" }],
-        "fileCount": 12,
-        "maxDepth": 2,
-        "topLevelDirs": ["src"],
+        "projectType": {
+          "value": "web-app",
+          "evidence": "index.html presente en el repo"
+        },
+        "primaryFramework": {
+          "value": null,
+          "evidence": "sin framework detectado en dependencias"
+        },
+        "runtime": {
+          "value": "JavaScript",
+          "evidence": "lenguaje dominante por bytes (endpoint /languages)"
+        },
+        "database": {
+          "value": null,
+          "evidence": "sin base de datos detectada en dependencias"
+        },
+        "buildTools": {
+          "value": [],
+          "evidence": "sin herramientas de build detectadas"
+        },
+        "testTools": {
+          "value": [],
+          "evidence": "sin herramientas de test detectadas"
+        },
+        "dependencies": [],
+        "fileCount": 14,
+        "maxDepth": 1,
+        "topLevelDirs": [
+          ".claude",
+          "css",
+          "js"
+        ],
         "hasTests": false,
         "hasCI": false,
         "hasDocker": false,
         "hasDocs": false,
-        "daysAlive": 400,
-        "daysSinceLastPush": 380,
+        "daysAlive": 2,
+        "daysSinceLastPush": 2,
+        "status": "activo"
+      },
+      "summary": {
+        "pitch": "Proyecto de tipo web-app en JavaScript.",
+        "summary": "Resumen generado sin LLM (ANTHROPIC_API_KEY no configurada al momento del build). Sin descripción en GitHub. Estado: activo, 1 commits.",
+        "highlights": [
+          "Sin evidencia adicional disponible (sin LLM)",
+          "Sin evidencia adicional disponible (sin LLM)"
+        ],
+        "techNotes": [
+          "Runtime: JavaScript",
+          "0 dependencias declaradas en manifiestos"
+        ],
+        "domain": "sin-clasificar",
+        "keywords": [
+          "javascript",
+          "css",
+          "html",
+          "python",
+          "powershell"
+        ],
+        "confidence": "baja"
+      },
+      "size": 3.4,
+      "color": "#f1e05a",
+      "dashedBorder": false,
+      "cluster": 1
+    },
+    {
+      "id": "PredictorMundial",
+      "repo": {
+        "name": "PredictorMundial",
+        "description": null,
+        "url": "https://github.com/VelazPedro/PredictorMundial",
+        "homepage": null,
+        "topics": [],
+        "license": null,
+        "createdAt": "2026-04-20T22:37:01Z",
+        "pushedAt": "2026-08-05T20:17:52Z",
+        "commitCount": 9,
+        "stars": 1,
+        "forks": 0,
+        "languages": {
+          "Python": 19464,
+          "CSS": 17512,
+          "JavaScript": 12120,
+          "HTML": 4968
+        },
+        "defaultBranch": "main"
+      },
+      "analysis": {
+        "projectType": {
+          "value": "script",
+          "evidence": "lenguaje dominante: Python, sin indicios de web/api/cli"
+        },
+        "primaryFramework": {
+          "value": null,
+          "evidence": "sin framework detectado en dependencias"
+        },
+        "runtime": {
+          "value": "Python",
+          "evidence": "manifiesto: requirements.txt"
+        },
+        "database": {
+          "value": null,
+          "evidence": "sin base de datos detectada en dependencias"
+        },
+        "buildTools": {
+          "value": [],
+          "evidence": "sin herramientas de build detectadas"
+        },
+        "testTools": {
+          "value": [],
+          "evidence": "sin herramientas de test detectadas"
+        },
+        "dependencies": [
+          {
+            "name": "beautifulsoup4",
+            "version": "==4.14.3",
+            "type": "prod"
+          },
+          {
+            "name": "bs4",
+            "version": "==0.0.2",
+            "type": "prod"
+          },
+          {
+            "name": "certifi",
+            "version": "==2026.2.25",
+            "type": "prod"
+          },
+          {
+            "name": "charset-normalizer",
+            "version": "==3.4.7",
+            "type": "prod"
+          },
+          {
+            "name": "idna",
+            "version": "==3.11",
+            "type": "prod"
+          },
+          {
+            "name": "lxml",
+            "version": "==6.1.0",
+            "type": "prod"
+          },
+          {
+            "name": "numpy",
+            "version": "==2.4.4",
+            "type": "prod"
+          },
+          {
+            "name": "pandas",
+            "version": "==3.0.2",
+            "type": "prod"
+          },
+          {
+            "name": "python-dateutil",
+            "version": "==2.9.0.post0",
+            "type": "prod"
+          },
+          {
+            "name": "requests",
+            "version": "==2.33.1",
+            "type": "prod"
+          },
+          {
+            "name": "six",
+            "version": "==1.17.0",
+            "type": "prod"
+          },
+          {
+            "name": "soupsieve",
+            "version": "==2.8.3",
+            "type": "prod"
+          },
+          {
+            "name": "typing_extensions",
+            "version": "==4.15.0",
+            "type": "prod"
+          },
+          {
+            "name": "tzdata",
+            "version": "==2026.1",
+            "type": "prod"
+          },
+          {
+            "name": "urllib3",
+            "version": "==2.6.3",
+            "type": "prod"
+          }
+        ],
+        "fileCount": 12,
+        "maxDepth": 1,
+        "topLevelDirs": [
+          "static",
+          "templates"
+        ],
+        "hasTests": false,
+        "hasCI": false,
+        "hasDocker": false,
+        "hasDocs": false,
+        "daysAlive": 109,
+        "daysSinceLastPush": 2,
+        "status": "activo"
+      },
+      "summary": {
+        "pitch": "Proyecto de tipo script en Python.",
+        "summary": "Resumen generado sin LLM (ANTHROPIC_API_KEY no configurada al momento del build). Sin descripción en GitHub. Estado: activo, 9 commits.",
+        "highlights": [
+          "Sin evidencia adicional disponible (sin LLM)",
+          "Sin evidencia adicional disponible (sin LLM)"
+        ],
+        "techNotes": [
+          "Runtime: Python",
+          "15 dependencias declaradas en manifiestos"
+        ],
+        "domain": "sin-clasificar",
+        "keywords": [
+          "python",
+          "css",
+          "javascript",
+          "html"
+        ],
+        "confidence": "baja"
+      },
+      "size": 10.4,
+      "color": "#3572A5",
+      "dashedBorder": false,
+      "cluster": 1
+    },
+    {
+      "id": "SIMON-IN-C",
+      "repo": {
+        "name": "SIMON-IN-C",
+        "description": "Juego de simón en C, con mecánicas basadas en lógica e implementadas en un entorno gráfico con SDL2 y sus variantes.",
+        "url": "https://github.com/VelazPedro/SIMON-IN-C",
+        "homepage": null,
+        "topics": [],
+        "license": null,
+        "createdAt": "2025-10-31T23:31:11Z",
+        "pushedAt": "2025-10-31T23:41:13Z",
+        "commitCount": 2,
+        "stars": 0,
+        "forks": 0,
+        "languages": {
+          "C": 54307
+        },
+        "defaultBranch": "main"
+      },
+      "analysis": {
+        "projectType": {
+          "value": "otro",
+          "evidence": "sin heurística concluyente"
+        },
+        "primaryFramework": {
+          "value": null,
+          "evidence": "sin framework detectado en dependencias"
+        },
+        "runtime": {
+          "value": "C",
+          "evidence": "lenguaje dominante por bytes (endpoint /languages)"
+        },
+        "database": {
+          "value": null,
+          "evidence": "sin base de datos detectada en dependencias"
+        },
+        "buildTools": {
+          "value": [],
+          "evidence": "sin herramientas de build detectadas"
+        },
+        "testTools": {
+          "value": [],
+          "evidence": "sin herramientas de test detectadas"
+        },
+        "dependencies": [],
+        "fileCount": 14,
+        "maxDepth": 1,
+        "topLevelDirs": [
+          "fnt",
+          "snd"
+        ],
+        "hasTests": false,
+        "hasCI": false,
+        "hasDocker": false,
+        "hasDocs": false,
+        "daysAlive": 280,
+        "daysSinceLastPush": 280,
         "status": "pausado"
       },
       "summary": {
-        "pitch": "Herramientas de línea de comandos para tareas repetitivas de desarrollo.",
-        "summary": "Conjunto de scripts CLI empaquetados con tsx. Sin suite de tests ni CI configurado. Uso personal, bajo mantenimiento activo.",
-        "highlights": ["Validación de inputs con zod"],
-        "techNotes": ["Ejecutado vía tsx sin paso de build previo"],
-        "domain": "devtools",
-        "keywords": ["cli", "node", "automatización"],
-        "confidence": "media"
+        "pitch": "Juego de simón en C, con mecánicas basadas en lógica e implementadas en un entorno gráfico con SDL2 y sus variantes.",
+        "summary": "Resumen generado sin LLM (ANTHROPIC_API_KEY no configurada al momento del build). Juego de simón en C, con mecánicas basadas en lógica e implementadas en un entorno gráfico con SDL2 y sus variantes. Estado: pausado, 2 commits.",
+        "highlights": [
+          "Sin evidencia adicional disponible (sin LLM)",
+          "Sin evidencia adicional disponible (sin LLM)"
+        ],
+        "techNotes": [
+          "Runtime: C",
+          "0 dependencias declaradas en manifiestos"
+        ],
+        "domain": "sin-clasificar",
+        "keywords": [
+          "c"
+        ],
+        "confidence": "baja"
       },
-      "size": 6,
-      "color": "#3178c6",
+      "size": 5.2,
+      "color": "#555555",
       "dashedBorder": true,
       "cluster": 0
     },
     {
-      "id": "data-pipeline",
+      "id": "TrabajoPracticoENUT",
       "repo": {
-        "name": "data-pipeline",
-        "description": "Pipeline de procesamiento de datos en Python.",
-        "url": "https://github.com/VelazPedro/data-pipeline",
+        "name": "TrabajoPracticoENUT",
+        "description": "Trabajo practico de analisis de un alto volumen de datos en C",
+        "url": "https://github.com/VelazPedro/TrabajoPracticoENUT",
         "homepage": null,
-        "topics": ["data", "python", "etl"],
-        "license": "MIT",
-        "createdAt": "2024-11-01T00:00:00Z",
-        "pushedAt": "2026-07-01T00:00:00Z",
-        "commitCount": 88,
-        "stars": 5,
-        "forks": 2,
-        "languages": { "Python": 60000 },
+        "topics": [],
+        "license": null,
+        "createdAt": "2026-05-29T13:37:09Z",
+        "pushedAt": "2026-05-31T22:10:15Z",
+        "commitCount": 5,
+        "stars": 0,
+        "forks": 0,
+        "languages": {
+          "C": 18178
+        },
         "defaultBranch": "main"
       },
       "analysis": {
-        "projectType": { "value": "script", "evidence": "sin entrypoint web" },
-        "primaryFramework": { "value": "pandas", "evidence": "requirements.txt" },
-        "runtime": { "value": "Python", "evidence": "requirements.txt" },
-        "database": { "value": "PostgreSQL", "evidence": "dependency: psycopg2" },
-        "buildTools": { "value": [], "evidence": "no aplica" },
-        "testTools": { "value": ["pytest"], "evidence": "requirements.txt" },
-        "dependencies": [{ "name": "pandas", "version": "2.2.0", "type": "prod" }],
-        "fileCount": 54,
-        "maxDepth": 3,
-        "topLevelDirs": ["etl", "tests"],
-        "hasTests": true,
-        "hasCI": true,
-        "hasDocker": true,
-        "hasDocs": true,
-        "daysAlive": 640,
-        "daysSinceLastPush": 37,
+        "projectType": {
+          "value": "otro",
+          "evidence": "sin heurística concluyente"
+        },
+        "primaryFramework": {
+          "value": null,
+          "evidence": "sin framework detectado en dependencias"
+        },
+        "runtime": {
+          "value": "C",
+          "evidence": "lenguaje dominante por bytes (endpoint /languages)"
+        },
+        "database": {
+          "value": null,
+          "evidence": "sin base de datos detectada en dependencias"
+        },
+        "buildTools": {
+          "value": [],
+          "evidence": "sin herramientas de build detectadas"
+        },
+        "testTools": {
+          "value": [],
+          "evidence": "sin herramientas de test detectadas"
+        },
+        "dependencies": [],
+        "fileCount": 15,
+        "maxDepth": 2,
+        "topLevelDirs": [
+          "bin",
+          "obj"
+        ],
+        "hasTests": false,
+        "hasCI": false,
+        "hasDocker": false,
+        "hasDocs": false,
+        "daysAlive": 70,
+        "daysSinceLastPush": 68,
         "status": "activo"
       },
       "summary": {
-        "pitch": "Pipeline ETL para normalizar datasets públicos.",
-        "summary": "Procesa datasets crudos y los carga a PostgreSQL. Incluye tests con pytest y Dockerfile para reproducibilidad.",
-        "highlights": ["Dockerizado", "CI configurado con pytest"],
-        "techNotes": ["pandas para transformación", "psycopg2 para carga a Postgres"],
-        "domain": "datos",
-        "keywords": ["etl", "python", "datos", "postgresql"],
-        "confidence": "alta"
+        "pitch": "Trabajo practico de analisis de un alto volumen de datos en C",
+        "summary": "Resumen generado sin LLM (ANTHROPIC_API_KEY no configurada al momento del build). Trabajo practico de analisis de un alto volumen de datos en C Estado: activo, 5 commits.",
+        "highlights": [
+          "Sin evidencia adicional disponible (sin LLM)",
+          "Sin evidencia adicional disponible (sin LLM)"
+        ],
+        "techNotes": [
+          "Runtime: C",
+          "0 dependencias declaradas en manifiestos"
+        ],
+        "domain": "sin-clasificar",
+        "keywords": [
+          "c"
+        ],
+        "confidence": "baja"
       },
-      "size": 9,
-      "color": "#3572A5",
+      "size": 8.2,
+      "color": "#555555",
       "dashedBorder": false,
-      "cluster": 1
+      "cluster": 0
     }
   ],
   "edges": [
     {
-      "source": "grafo-portafolio",
-      "target": "cli-utils",
-      "weight": 0.42,
+      "source": "CalculadoraMonotributo",
+      "target": "SIMON-IN-C",
+      "weight": 0.45,
       "reasons": [
-        { "kind": "lenguaje", "weight": 0.2, "detail": "ambos 100% TypeScript" },
-        { "kind": "dominio", "weight": 0.1, "detail": "dominio compartido: devtools" },
-        { "kind": "topics", "weight": 0.12, "detail": "sin topics comunes directos, keywords cercanas" }
+        {
+          "kind": "lenguaje",
+          "weight": 0.2,
+          "detail": "similitud de lenguajes: 100%"
+        },
+        {
+          "kind": "topics",
+          "weight": 0.25,
+          "detail": "topics/keywords compartidos: 100%"
+        }
       ]
     },
     {
-      "source": "data-pipeline",
-      "target": "grafo-portafolio",
-      "weight": 0.25,
+      "source": "CalculadoraMonotributo",
+      "target": "TrabajoPracticoENUT",
+      "weight": 0.45,
       "reasons": [
-        { "kind": "topics", "weight": 0.25, "detail": "ambos usan \"análisis\" como keyword" }
+        {
+          "kind": "lenguaje",
+          "weight": 0.2,
+          "detail": "similitud de lenguajes: 100%"
+        },
+        {
+          "kind": "topics",
+          "weight": 0.25,
+          "detail": "topics/keywords compartidos: 100%"
+        }
+      ]
+    },
+    {
+      "source": "ITLeveling",
+      "target": "PredictorMundial",
+      "weight": 0.328,
+      "reasons": [
+        {
+          "kind": "lenguaje",
+          "weight": 0.12816747111804735,
+          "detail": "similitud de lenguajes: 64%"
+        },
+        {
+          "kind": "topics",
+          "weight": 0.2,
+          "detail": "topics/keywords compartidos: 80%"
+        }
+      ]
+    },
+    {
+      "source": "SIMON-IN-C",
+      "target": "TrabajoPracticoENUT",
+      "weight": 0.45,
+      "reasons": [
+        {
+          "kind": "lenguaje",
+          "weight": 0.2,
+          "detail": "similitud de lenguajes: 100%"
+        },
+        {
+          "kind": "topics",
+          "weight": 0.25,
+          "detail": "topics/keywords compartidos: 100%"
+        }
       ]
     }
   ]
