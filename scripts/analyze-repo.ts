@@ -12,7 +12,7 @@ const ARCHIVADO_THRESHOLD_DAYS = 548
 // ---- Parsers de manifiestos ----
 
 function splitPySpec(spec: string): { name: string; version: string } {
-  const match = /^([A-Za-z0-9_.\-]+)\s*(\[[^\]]*\])?\s*(.*)$/.exec(spec.trim())
+  const match = /^([A-Za-z0-9_.-]+)\s*(\[[^\]]*\])?\s*(.*)$/.exec(spec.trim())
   const name = match?.[1] ?? spec.trim()
   const version = (match?.[3] ?? '').trim()
   return { name, version }
@@ -64,7 +64,7 @@ function parseTomlKeyValueSection(section: string, type: 'prod' | 'dev'): Depend
   const deps: DependencyRef[] = []
   for (const rawLine of section.split(/\r?\n/)) {
     const line = rawLine.trim()
-    const match = /^([A-Za-z0-9_.\-]+)\s*=\s*(.+)$/.exec(line)
+    const match = /^([A-Za-z0-9_.-]+)\s*=\s*(.+)$/.exec(line)
     if (!match?.[1]) continue
     const name = match[1]
     if (name === 'python') continue
