@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <rect width="1200" height="630" fill="#0b0d10"/>
+  <g stroke="rgba(148,163,184,0.35)" stroke-width="1.5">
+    <line x1="220" y1="200" x2="420" y2="320"/>
+    <line x1="420" y1="320" x2="700" y2="220"/>
+    <line x1="420" y1="320" x2="560" y2="470"/>
+    <line x1="700" y1="220" x2="920" y2="340"/>
+    <line x1="560" y1="470" x2="840" y2="500"/>
+  </g>
+  <g>
+    <circle cx="220" cy="200" r="16" fill="#3178c6"/>
+    <circle cx="420" cy="320" r="26" fill="#5eead4"/>
+    <circle cx="700" cy="220" r="14" fill="#f1e05a"/>
+    <circle cx="920" cy="340" r="18" fill="#3572A5"/>
+    <circle cx="560" cy="470" r="12" fill="#dea584"/>
+    <circle cx="840" cy="500" r="15" fill="#b07219"/>
+  </g>
+  <text x="90" y="580" font-family="'Space Grotesk', system-ui, sans-serif" font-size="44" fill="#e5e7eb">Portafolio — grafo de repositorios</text>
+</svg>

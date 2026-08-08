@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-08T00:18:41.038Z",
+  "generatedAt": "2026-08-08T00:24:08.683Z",
   "nodes": [
     {
       "id": "CalculadoraMonotributo",
@@ -80,7 +80,7 @@
       "size": 9.9,
       "color": "#555555",
       "dashedBorder": false,
-      "cluster": 1
+      "cluster": 0
     },
     {
       "id": "ITLeveling",
@@ -171,7 +171,7 @@
       "size": 3.4,
       "color": "#f1e05a",
       "dashedBorder": false,
-      "cluster": 0
+      "cluster": 1
     },
     {
       "id": "PredictorMundial",
@@ -335,7 +335,7 @@
       "size": 10.4,
       "color": "#3572A5",
       "dashedBorder": false,
-      "cluster": 0
+      "cluster": 1
     },
     {
       "id": "SIMON-IN-C",
@@ -417,7 +417,7 @@
       "size": 5.2,
       "color": "#555555",
       "dashedBorder": true,
-      "cluster": 1
+      "cluster": 0
     },
     {
       "id": "TrabajoPracticoENUT",
@@ -499,7 +499,7 @@
       "size": 8.2,
       "color": "#555555",
       "dashedBorder": false,
-      "cluster": 1
+      "cluster": 0
     }
   ],
   "edges": [
