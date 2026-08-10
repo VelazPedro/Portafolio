@@ -1,6 +1,161 @@
 {
-  "generatedAt": "2026-08-10T12:42:04.330Z",
+  "generatedAt": "2026-08-10T18:20:10.361Z",
   "nodes": [
+    {
+      "id": "BuscadorEnExcel",
+      "repo": {
+        "name": "BuscadorEnExcel",
+        "description": null,
+        "url": "https://github.com/VelazPedro/BuscadorEnExcel",
+        "homepage": null,
+        "topics": [],
+        "license": null,
+        "createdAt": "2026-08-10T18:00:51Z",
+        "pushedAt": "2026-08-10T18:14:06Z",
+        "commitCount": 2,
+        "stars": 0,
+        "forks": 0,
+        "languages": {
+          "TypeScript": 51004,
+          "CSS": 4441,
+          "HTML": 2279,
+          "JavaScript": 931
+        },
+        "defaultBranch": "master",
+        "readme": "# Buscador de Archivos\n\nApp de escritorio (Windows) que busca sobre miles de archivos indexados desde un Excel\ny abre la ubicación del archivo en el Explorador con doble click.\n\nPodés usar el Excel que quieras: al elegirlo, un selector te deja marcar qué columnas\nmostrar/buscar y cuál usar como destino (la carpeta a la que abre).\n\n## Uso\n\n1. Abrí la app.\n2. Escribí en el buscador para filtrar por nombre (y demás columnas que hayas elegido\n   mostrar).\n3. Doble click (o Enter) en un resultado abre su carpeta en el Explorador.\n4. Para cambiar de Excel: botón **\"Cambiar Excel…\"** en la barra superior.\n   1. Elegís el `.xlsx` en el diálogo.\n   2. Aparece un selector con las primeras filas de cada columna: tildá las que querés\n      **mostrar/buscar** (la primera tildada, de izquierda a derecha, se usa como nombre\n      de archivo) y elegí con el radio cuál es la columna **\"Destino\"** (la carpeta que\n      abre con doble click).\n   3. \"Indexar\" reindexa y guarda el índice para el próximo arranque.\n\nAtajos: `Ctrl+F` enfoca el buscador, flechas navegan la lista, `Esc` limpia.\n\n## Instalación / desarrollo\n\nRequisitos: Node LTS, pnpm (`npm install -g pnpm`).\n\n```bash\npnpm install\npnpm dev          # correr en desarrollo\npnpm dist         # compilar un .exe portable en release/\n```\n"
+      },
+      "analysis": {
+        "projectType": {
+          "value": "herramienta-escritorio",
+          "evidence": "dependency: electron"
+        },
+        "primaryFramework": {
+          "value": null,
+          "evidence": "sin framework detectado en dependencias"
+        },
+        "runtime": {
+          "value": "Node",
+          "evidence": "manifiesto: package.json"
+        },
+        "database": {
+          "value": null,
+          "evidence": "sin base de datos detectada en dependencias"
+        },
+        "buildTools": {
+          "value": [],
+          "evidence": "sin herramientas de build detectadas"
+        },
+        "testTools": {
+          "value": [
+            "Vitest"
+          ],
+          "evidence": "dependencias: Vitest"
+        },
+        "dependencies": [
+          {
+            "name": "zod",
+            "version": "^3.23.8",
+            "type": "prod"
+          },
+          {
+            "name": "xlsx",
+            "version": "^0.18.5",
+            "type": "prod"
+          },
+          {
+            "name": "@eslint/js",
+            "version": "^9.9.0",
+            "type": "dev"
+          },
+          {
+            "name": "@types/node",
+            "version": "^20.14.0",
+            "type": "dev"
+          },
+          {
+            "name": "electron",
+            "version": "^32.0.0",
+            "type": "dev"
+          },
+          {
+            "name": "electron-builder",
+            "version": "^25.0.0",
+            "type": "dev"
+          },
+          {
+            "name": "eslint",
+            "version": "^9.9.0",
+            "type": "dev"
+          },
+          {
+            "name": "tsx",
+            "version": "^4.19.0",
+            "type": "dev"
+          },
+          {
+            "name": "typescript",
+            "version": "^5.5.4",
+            "type": "dev"
+          },
+          {
+            "name": "typescript-eslint",
+            "version": "^8.0.0",
+            "type": "dev"
+          },
+          {
+            "name": "vitest",
+            "version": "^2.0.5",
+            "type": "dev"
+          }
+        ],
+        "fileCount": 33,
+        "maxDepth": 2,
+        "topLevelDirs": [
+          "scripts",
+          "src",
+          "tests"
+        ],
+        "hasTests": true,
+        "hasCI": false,
+        "hasDocker": false,
+        "hasDocs": false,
+        "daysAlive": 0,
+        "daysSinceLastPush": 0,
+        "status": "activo"
+      },
+      "summary": {
+        "pitch": "Aplicación de escritorio para Windows que busca sobre miles de archivos indexados desde una planilla de Excel y abre la carpeta del resultado en el Explorador, pensada para quien navega a diario un servidor de archivos catalogado en una planilla.",
+        "summary": "Cuando el inventario de un servidor vive en un Excel, encontrar un archivo implica filtrar la planilla a mano y después copiar la ruta al Explorador. El proyecto convierte esa planilla en un índice consultable: al elegir el .xlsx aparece un selector que muestra las primeras filas de cada columna, permite tildar cuáles se muestran y se buscan, y marcar con un radio cuál actúa como columna Destino, es decir la carpeta que se abre con doble click o Enter. La primera columna tildada, de izquierda a derecha, se toma como nombre de archivo. El índice generado se persiste para el arranque siguiente y se reconstruye con el botón Indexar al cambiar de planilla. La interacción está orientada a teclado: Ctrl+F enfoca el buscador, las flechas recorren la lista y Esc limpia.",
+        "highlights": [
+          "El esquema de la planilla no está fijado en el código: el mapeo de columnas a nombre, campos buscables y destino se define en tiempo de ejecución desde el selector, lo que permite apuntar la app a cualquier .xlsx.",
+          "El índice se materializa como archivo (data/index.json) y se declara en la configuración de electron-builder tanto en files como en extraResources, de modo que el ejecutable arranca con un índice ya construido y separado del bundle.",
+          "La indexación está separada de la aplicación: scripts/build-index.ts se ejecuta con tsx como comando propio (pnpm index), y existe un script de benchmark (scripts/bench.ts) junto a la suite de tests.",
+          "Distribución configurada como portable de Windows con salida en release/ y signAndEditExecutable desactivado, sin instalador."
+        ],
+        "techNotes": [
+          "Electron 32 con electron-builder 25; el proceso principal se compila a CommonJS (dist/main/main.cjs) mediante tsc con un tsconfig.build.json separado del tsconfig de typecheck, más un paso de copia de estáticos (scripts/copy-static.mjs).",
+          "Sólo dos dependencias de runtime: xlsx 0.18 para leer la planilla y zod 3 para validación de esquemas; todo lo demás es herramienta de desarrollo.",
+          "TypeScript 5.5 con ESLint 9 en configuración plana (eslint.config.mjs) y typescript-eslint; tests con Vitest sobre tests/ y vitest.config.ts.",
+          "Gestión de paquetes con pnpm y pnpm-workspace.yaml presente en la raíz, aunque el repositorio contiene un único package.json."
+        ],
+        "domain": "devtools",
+        "keywords": [
+          "índice desde excel",
+          "mapeo de columnas en runtime",
+          "electron",
+          "electron-builder portable",
+          "ruta destino en el explorador",
+          "index.json como extraresource",
+          "xlsx",
+          "navegación por teclado"
+        ],
+        "confidence": "alta"
+      },
+      "size": 5.2,
+      "color": "#3178c6",
+      "dashedBorder": false,
+      "cluster": 1
+    },
     {
       "id": "CalculadoraMonotributo",
       "repo": {
@@ -191,7 +346,7 @@
       "size": 6.4,
       "color": "#e34c26",
       "dashedBorder": false,
-      "cluster": 1
+      "cluster": 0
     },
     {
       "id": "PC_DOCTOR",
@@ -662,7 +817,7 @@
         "hasDocker": false,
         "hasDocs": false,
         "daysAlive": 3,
-        "daysSinceLastPush": 2,
+        "daysSinceLastPush": 3,
         "status": "activo"
       },
       "summary": {
@@ -701,10 +856,34 @@
   ],
   "edges": [
     {
-      "source": "CalculadoraMonotributo",
-      "target": "ITLeveling",
+      "source": "BuscadorEnExcel",
+      "target": "StudyHUD",
+      "weight": 0.199,
+      "reasons": [
+        {
+          "kind": "lenguaje",
+          "weight": 0.19901757207912374,
+          "detail": "similitud de lenguajes: 100%"
+        }
+      ]
+    },
+    {
+      "source": "BuscadorEnExcel",
+      "target": "CalculadoraMonotributo",
       "weight": 0,
       "reasons": []
+    },
+    {
+      "source": "ITLeveling",
+      "target": "PredictorMundial",
+      "weight": 0.039,
+      "reasons": [
+        {
+          "kind": "lenguaje",
+          "weight": 0.03920235941781652,
+          "detail": "similitud de lenguajes: 20%"
+        }
+      ]
     },
     {
       "source": "PC_DOCTOR",
@@ -720,23 +899,6 @@
           "kind": "dependencias",
           "weight": 0.015909090909090907,
           "detail": "dependencias compartidas: 5%"
-        }
-      ]
-    },
-    {
-      "source": "ITLeveling",
-      "target": "StudyHUD",
-      "weight": 0.019,
-      "reasons": [
-        {
-          "kind": "lenguaje",
-          "weight": 0.0021423244184630877,
-          "detail": "similitud de lenguajes: 1%"
-        },
-        {
-          "kind": "topics",
-          "weight": 0.016666666666666666,
-          "detail": "topics/keywords compartidos: 7%"
         }
       ]
     }
