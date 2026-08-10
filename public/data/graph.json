@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-08T15:28:04.786Z",
+  "generatedAt": "2026-08-10T12:42:04.330Z",
   "nodes": [
     {
       "id": "CalculadoraMonotributo",
@@ -56,8 +56,8 @@
         "hasCI": false,
         "hasDocker": false,
         "hasDocs": true,
-        "daysAlive": 64,
-        "daysSinceLastPush": 1,
+        "daysAlive": 66,
+        "daysSinceLastPush": 3,
         "status": "activo"
       },
       "summary": {
@@ -91,7 +91,107 @@
       "size": 9.9,
       "color": "#555555",
       "dashedBorder": false,
-      "cluster": 0
+      "cluster": 1
+    },
+    {
+      "id": "ITLeveling",
+      "repo": {
+        "name": "ITLeveling",
+        "description": null,
+        "url": "https://github.com/VelazPedro/ITLeveling",
+        "homepage": null,
+        "topics": [],
+        "license": null,
+        "createdAt": "2026-08-05T18:36:37Z",
+        "pushedAt": "2026-08-09T19:59:56Z",
+        "commitCount": 3,
+        "stars": 0,
+        "forks": 0,
+        "languages": {
+          "HTML": 870211,
+          "TeX": 270229,
+          "JavaScript": 46506,
+          "CSS": 16713,
+          "Python": 2933,
+          "PowerShell": 1153
+        },
+        "defaultBranch": "main",
+        "readme": "# IT Leveling\n\nDashboard de gamificación para soporte IT: cargás tickets y el sistema calcula\nsolo la experiencia, el nivel y las seis estadísticas del operador.\n\n## Cómo ejecutarlo\n\n### Como aplicación de escritorio (.exe)\n\n`dist\\IT Leveling.exe` es un único archivo portable: doble clic y abre en su propia\nventana, sin navegador ni URL que escribir. Pesa ~14 MB y no necesita Python instalado\nen la máquina donde corre.\n\nPara recompilarlo después de tocar el código:\n\n```bash\npython -m pip install pywebview pyinstaller\n```\n\n```bash\npowershell -ExecutionPolicy Bypass -File build.ps1\n```\n\nDetalles del empaquetado ([main.py](main.py)):\n\n- Usa **WebView2** (el motor de Edge, ya viene con Windows 10/11), por eso el .exe es chico.\n- Adentro levanta un servidor local en `127.0.0.1:47820`, pero eso es transparente: la app\n  lo arranca y lo cierra sola. El puerto es fijo a propósito, porque IndexedDB separa los\n  datos por origen y un puerto al azar borraría el progreso en cada arranque.\n- Los datos van a `%LOCALAPPDATA%\\ITLeveling`, así que sobreviven a cerrar la app y a\n  recompilar el .exe. Para empezar de cero, borrar esa carpeta.\n- Si el puerto está ocupado (típicamente porque ya hay una ventana abierta), avisa con un\n  cartel en vez de fallar en silencio.\n\n### En el navegador (desarrollo)\n\nUsa módulos ES, así que necesita servirse por HTTP (abrirlo con doble clic no alcanza).\n\n```bash\npython -m http.server 5173\n```\n\nDespués entrar a `http://localhost:5173`.\n\n## Estructura\n\n| Archivo | Qué hace |\n|---|---|\n| `main.py` | Envoltorio de escritorio: ventana nativa + servidor interno en puerto fijo. |\n| `build.ps1` | Compila el `.exe` de un solo archivo con PyInstaller. |\n| `index.html` | Estructura del dashboard y los dos modales (carga de ticket / subida de nivel). |\n| `css/styles.css` | Estética: degradé azul, bordes duros, sin radios, scanlines CRT. |\n| `js/db.js` | Base de datos local (IndexedDB): tablas `usuarios` y `tickets`. Sin servidor ni conexión. |\n| `js/config.js` | Todo lo parametrizable: stats, tipos de ticket, urgencias, roles, TDR, rangos, topes y curva de XP. |\n| `js/pixelart.js` | Sprites dibujados como grillas de caracteres, convertidos a SVG. Sin imágenes externas. |\n| `js/motor.js` | Cálculo puro: ticket → deltas de cada estadística + XP. |\n| `js/estado.js` | Usuario, nivel, estadísticas, historial, persistencia y armado del informe automático. |\n| `js/ui.js` | Pintado del dashboard. |\n| `js/app.js` | Une todo y maneja los eventos. |\n\n## Base de datos y sesiones\n\nToda la información vive en **IndexedDB**, la base que trae el navegador: es una base\nreal (tablas, índices, transacciones) que corre 100% en la máquina, sin servidor ni internet.\n\n- Tabla `usuarios` — un registro por personaje, con clave el nombre normalizado\n  (mayúsculas y sin espacios de más, así \"pablo\", \"Pablo \" y \"PABLO\" son el mismo).\n  Guarda nivel, XP, XP total acumulada, las seis estadísticas, tickets totales y el último informe.\n- Tabla `tickets` — id autoincremental, índices por usuario y por fecha. Guarda los datos\n  cargados más el `ProgresoStatxTicket` (delta de cada estadística) y la XP que dio.\n\nAntes de entrar, la pantalla de ingreso pide el nombre. Si ya existe, se recupera el\nprogreso tal cual quedó; si no, se crea el personaje en nivel 1. Debajo aparecen los\npersonajes guardados para entrar de un clic. Si venías de la versión anterior con partida\nen localStorage, se importa automáticamente la primera vez.\n\n## Ventanas del menú\n\nEl botón de menú (arriba a la izquierda) abre:\n\n- **CLASIFICACIÓN** — tabla con todos los personajes creados, ordenados por nivel y después\n  por XP total, con rango y cantidad de tickets. Tu fila queda resaltada.\n- **TICKETS** — compilado de todos los tickets cargados, del más nuevo al más viejo, con el\n  detalle completo: categoría y dificultad, demora real contra la esperada, urgencia, rol\n  de quien lo creó, TDR, nivel resultante y cuánto movió cada estadística. Se puede filtrar\n  entre los tuyos y los de todos los personajes.\n- **CAMBIAR USUARIO** — guarda y vuelve a la pantalla de ingreso.\n\n## Cómo se calculan las estadísticas\n\nCada ticket aporta: categoría (dificultad e importancia), demora real, urgencia,\nrol de quien lo creó y TDR (cómo llegó: Jarvis, asignado, derivado o voluntario).\n\nEl motor compara la demora contra un tiempo esperado (referencia del tipo ajustada\npor urgencia) y de ahí sale un rendimiento entre -1.6 y 1.6 que alimenta cada stat:\n\n- **Velocidad** — rendimiento contra el tiempo esperado, amplificado por la urgencia.\n- **Confianza** — importancia del pedido cumplido en término; fallar en algo importante resta más.\n- **Investigación** — sube con la dificultad; extra si además llevó tiempo; resta si un ticket trivial se estiró.\n- **Comunicación** — derivaciones, roles altos y urgencias críticas.\n- **Efectividad** — resultado global del ticket.\n- **Voluntario** — sólo suma cuando el ticket se tomó por decisión propia. Sin tope.\n\nNingún delta supera ±8/+10 por ticket, y ninguna stat baja de 0.\n\n## Nivel y topes\n\n- Nivel máximo: 100. XP para el próximo nivel: `80 + (nivel - 1) * 20`.\n- Tope de stats: `20 + (nivel - 1) * 2` (nivel 1 = 20, nivel 100 = 218). Voluntario no tiene tope.\n- Al subir de nivel aparece el panel dorado con nivel anterior, nuevo, rango y tope nuevo.\n\n## Rangos\n\n| Nivel | Rango |\n|---|---|\n| 100 | REGEN DE RAFA |\n| 81-99 | REFERENTE DE FACTO |\n| 66-80 | SOPORTE DE JERARQUÍA |\n| 51-65 | REY DE LOS WACHINES |\n| 36-50 | TIPO DE MEGATECH |\n| 21-35 | SOPORTE NIVEL -1 |\n| 11-20 | TIPO QUE RESUELVE |\n| 1-10 | RANDOM |\n\n## Utilidades de consola\n\n```js\nITL.estado()               // personaje con la sesión abierta\nITL.usuarios()             // todos los personajes de la base\nITL.tickets()              // todos los tickets de la base\nITL.borrarUsuario('PABLO') // borra un personaje y sus tickets\n```\n"
+      },
+      "analysis": {
+        "projectType": {
+          "value": "web-app",
+          "evidence": "index.html presente en el repo"
+        },
+        "primaryFramework": {
+          "value": null,
+          "evidence": "sin framework detectado en dependencias"
+        },
+        "runtime": {
+          "value": "HTML",
+          "evidence": "lenguaje dominante por bytes (endpoint /languages)"
+        },
+        "database": {
+          "value": null,
+          "evidence": "sin base de datos detectada en dependencias"
+        },
+        "buildTools": {
+          "value": [],
+          "evidence": "sin herramientas de build detectadas"
+        },
+        "testTools": {
+          "value": [],
+          "evidence": "sin herramientas de test detectadas"
+        },
+        "dependencies": [],
+        "fileCount": 24,
+        "maxDepth": 2,
+        "topLevelDirs": [
+          "build",
+          "css",
+          "dist",
+          "js"
+        ],
+        "hasTests": false,
+        "hasCI": false,
+        "hasDocker": false,
+        "hasDocs": false,
+        "daysAlive": 5,
+        "daysSinceLastPush": 1,
+        "status": "activo"
+      },
+      "summary": {
+        "pitch": "Dashboard de gamificación para operadores de soporte IT: se cargan tickets y el sistema deriva XP, nivel y seis estadísticas del personaje, disponible como app de escritorio portable para Windows.",
+        "summary": "El trabajo de mesa de ayuda genera un historial de tickets que rara vez se traduce en una métrica legible de desempeño individual. El proyecto convierte cada ticket cargado —categoría, demora real, urgencia, rol de quien lo creó y forma de llegada (TDR)— en deltas de seis estadísticas y en experiencia, comparando la demora contra un tiempo esperado ajustado por urgencia para obtener un rendimiento acotado entre -1.6 y 1.6. El estado completo (usuarios, tickets, niveles, historial) vive en IndexedDB dentro de la máquina, sin servidor ni conexión, con acceso por nombre normalizado para retomar el progreso. Sobre el mismo frontend se ofrecen dos formas de ejecución: servido por HTTP para desarrollo, o como ejecutable único de unos 14 MB con ventana nativa. El menú agrega clasificación entre personajes, compilado filtrable de tickets y cambio de usuario.",
+        "highlights": [
+          "El servidor interno del ejecutable usa un puerto fijo (127.0.0.1:47820) porque IndexedDB particiona los datos por origen: un puerto aleatorio dejaría el progreso inaccesible en cada arranque, y si el puerto está ocupado la app avisa en vez de fallar en silencio.",
+          "Cálculo aislado en js/motor.js como transformación pura de ticket a deltas de estadística y XP, con todos los parámetros ajustables (stats, tipos de ticket, urgencias, roles, TDR, rangos, topes y curva de XP) centralizados en js/config.js.",
+          "Persistencia con dos almacenes en IndexedDB: usuarios con clave por nombre normalizado a mayúsculas y sin espacios sobrantes, y tickets con id autoincremental e índices por usuario y por fecha, guardando el delta por estadística junto al registro.",
+          "Migración automática desde la versión previa basada en localStorage la primera vez que se abre, y datos ubicados en %LOCALAPPDATA%\\ITLeveling para que sobrevivan a recompilar el ejecutable."
+        ],
+        "techNotes": [
+          "Frontend en HTML, CSS y JavaScript vanilla con módulos ES divididos por responsabilidad (db, config, motor, estado, ui, app); requiere servirse por HTTP y no admite apertura por doble clic del index.html.",
+          "Empaquetado de escritorio con pywebview apoyado en WebView2, el motor de Edge ya presente en Windows 10/11, lo que mantiene el binario en torno a 14 MB; el build usa PyInstaller en modo archivo único vía build.ps1 y el .spec del repo.",
+          "Sin dependencias de frontend ni imágenes externas: los sprites se declaran como grillas de caracteres en js/pixelart.js y se convierten a SVG en tiempo de ejecución.",
+          "Superficie de depuración expuesta en consola bajo el espacio ITL (estado, usuarios, tickets, borrarUsuario), como interfaz de administración en lugar de pantallas dedicadas."
+        ],
+        "domain": "soporte técnico",
+        "keywords": [
+          "gamificación de tickets",
+          "indexeddb",
+          "pywebview",
+          "webview2",
+          "pyinstaller onefile",
+          "curva de xp",
+          "puerto fijo por origen",
+          "pixel art en svg"
+        ],
+        "confidence": "alta"
+      },
+      "size": 6.4,
+      "color": "#e34c26",
+      "dashedBorder": false,
+      "cluster": 1
     },
     {
       "id": "PC_DOCTOR",
@@ -198,8 +298,8 @@
         "hasCI": false,
         "hasDocker": false,
         "hasDocs": false,
-        "daysAlive": 0,
-        "daysSinceLastPush": 0,
+        "daysAlive": 2,
+        "daysSinceLastPush": 2,
         "status": "activo"
       },
       "summary": {
@@ -370,8 +470,8 @@
         "hasCI": false,
         "hasDocker": false,
         "hasDocs": false,
-        "daysAlive": 110,
-        "daysSinceLastPush": 3,
+        "daysAlive": 112,
+        "daysSinceLastPush": 5,
         "status": "activo"
       },
       "summary": {
@@ -561,8 +661,8 @@
         "hasCI": false,
         "hasDocker": false,
         "hasDocs": false,
-        "daysAlive": 1,
-        "daysSinceLastPush": 1,
+        "daysAlive": 3,
+        "daysSinceLastPush": 2,
         "status": "activo"
       },
       "summary": {
@@ -596,13 +696,13 @@
       "size": 5.2,
       "color": "#3178c6",
       "dashedBorder": false,
-      "cluster": 0
+      "cluster": 1
     }
   ],
   "edges": [
     {
       "source": "CalculadoraMonotributo",
-      "target": "PC_DOCTOR",
+      "target": "ITLeveling",
       "weight": 0,
       "reasons": []
     },
@@ -624,14 +724,19 @@
       ]
     },
     {
-      "source": "PredictorMundial",
+      "source": "ITLeveling",
       "target": "StudyHUD",
-      "weight": 0.011,
+      "weight": 0.019,
       "reasons": [
         {
           "kind": "lenguaje",
-          "weight": 0.010915640075630196,
-          "detail": "similitud de lenguajes: 5%"
+          "weight": 0.0021423244184630877,
+          "detail": "similitud de lenguajes: 1%"
+        },
+        {
+          "kind": "topics",
+          "weight": 0.016666666666666666,
+          "detail": "topics/keywords compartidos: 7%"
         }
       ]
     }

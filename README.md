@@ -13,7 +13,7 @@ npm run dev
 
 ## Pipeline de datos
 
-Requiere `.env.local` (ver `.env.local.example`) con `GITHUB_TOKEN` y `ANTHROPIC_API_KEY`.
+Ninguna de las dos API keys es obligatoria; ambas son opcionales y sólo levantan límites o automatizan un paso manual.
 
 ```
 npm run pipeline:fetch       # baja metadatos crudos de GitHub -> .cache/raw/
@@ -23,7 +23,10 @@ npm run pipeline:build-graph # calcula aristas y emite public/data/graph.json
 npm run pipeline             # corre las 4 fases en orden
 ```
 
-Sin `GITHUB_TOKEN`, `fetch-repos` usa la API pública sin autenticar (60 req/hora). Sin `ANTHROPIC_API_KEY`, `build-graph` genera un resumen factual sin LLM por repo (`confidence: "baja"`, sin inventar features) en vez de fallar.
+- `GITHUB_TOKEN` (opcional, `.env.local`, ver `.env.local.example`): sin él, `fetch-repos` usa la API pública sin autenticar (60 req/hora, suficiente para el tamaño actual del portafolio). Con token sube a 5000 req/hora.
+- `ANTHROPIC_API_KEY` (opcional): sólo la usa `pipeline:summarize` para redactar el resumen de un repo. Si preferís no llamar al modelo (o ya tenés el resumen redactado a mano), se puede saltear ese paso y escribir directamente `.cache/summaries/<repo>.json` con la forma `{ "inputHash": "manual-entry", "summary": { pitch, summary, highlights[], techNotes[], domain, keywords[], confidence } }` — es exactamente lo que consume `build-graph`, no le importa de dónde salió.
+
+`build-graph` sólo incluye en el grafo los repos que tengan un archivo en `.cache/summaries/`; sin resumen, el repo queda afuera (no se fabrica contenido).
 
 Todo lo que cuelga de `.cache/` es local y no se commitea; lo único versionado es `public/data/graph.json`, que es la única fuente que consume el frontend en runtime.
 
