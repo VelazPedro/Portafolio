@@ -338,6 +338,15 @@ export function ForceGraph({ graph, selectedId, onSelectNode }: Props) {
     null,
   )
   const DRAG_TOLERANCE_PX = 4
+  // Reheat de la simulación durante el arrastre, espaciado en el tiempo: sin
+  // esto habría que elegir entre no reactivar nunca la física (nodos vecinos
+  // quedan estáticos mientras arrastrás) o reactivarla una sola vez al
+  // empezar (cooldownTicks se agota si mantenés apretado más de ~2-3s y el
+  // resto de nodos se congela hasta que soltás). Reenganchar cada cierto
+  // intervalo mientras el mouse sigue en movimiento mantiene la simulación
+  // viva todo lo que dure el arrastre.
+  const lastReheatAtRef = useRef(0)
+  const REHEAT_INTERVAL_MS = 400
 
   const handleContainerMouseMove = useCallback(
     (e: ReactMouseEvent<HTMLDivElement>) => {
@@ -381,14 +390,23 @@ export function ForceGraph({ graph, selectedId, onSelectNode }: Props) {
         if (Math.hypot(dx, dy) < DRAG_TOLERANCE_PX) return
         drag.moved = true
         // Reactiva la simulación para que los nodos conectados reaccionen al
-        // arrastre (si no, quedan estáticos: "las físicas no funcionan"). Se
-        // vuelve a bloquear la interacción (`ready=false`) durante ese
-        // reacomodo — el mismo gate que evita clickear un nodo en movimiento
-        // al cargar la página aplica acá también, porque reactivar la física
-        // reabre esa misma ventana de riesgo. handleEngineStop la repone en
-        // true solo cuando la simulación realmente termina de asentarse.
-        setReady(false)
+        // arrastre (si no, quedan estáticos: "las físicas no funcionan").
+        // No se toca `ready` acá: el hit-test propio (findNodeAtPoint) lee
+        // las posiciones mutadas en vivo, no una copia vieja, así que no hay
+        // riesgo de clickear "donde el nodo estaba" como en el asentamiento
+        // inicial — bloquear la interacción acá solo generaba el cartel
+        // "acomodando nodos" en cada arrastre, por mínimo que fuera.
         fg.d3ReheatSimulation()
+        lastReheatAtRef.current = performance.now()
+      } else {
+        // Sin este re-reheat periódico, cooldownTicks se agota si el drag
+        // dura más de unos segundos: el motor para por completo y el resto
+        // de nodos queda congelado (no siguen al nodo arrastrado) hasta soltar.
+        const now = performance.now()
+        if (now - lastReheatAtRef.current > REHEAT_INTERVAL_MS) {
+          fg.d3ReheatSimulation()
+          lastReheatAtRef.current = now
+        }
       }
       const rect = el.getBoundingClientRect()
       const { x, y } = fg.screen2GraphCoords(e.clientX - rect.left, e.clientY - rect.top)
@@ -403,7 +421,16 @@ export function ForceGraph({ graph, selectedId, onSelectNode }: Props) {
       const drag = dragRef.current
       if (!drag) return
       dragRef.current = null
-      if (!drag.moved) onSelectNode(drag.node)
+      if (!drag.moved) {
+        onSelectNode(drag.node)
+        return
+      }
+      // Soltar el nodo: fx/fy lo tenían fijo (d3-force ignora la física
+      // mientras están seteados). Sin este reset, todo nodo arrastrado queda
+      // pegado en su lugar para siempre y pierde movilidad.
+      drag.node.fx = undefined
+      drag.node.fy = undefined
+      fgRef.current?.d3ReheatSimulation()
     }
 
     window.addEventListener('mousemove', handleWindowMouseMove)

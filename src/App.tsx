@@ -63,7 +63,7 @@ function App() {
 
   return (
     <div className="flex h-full w-full flex-col bg-bg">
-      <header className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 bg-surface px-4 py-2">
+      <header className="sticky top-0 z-20 flex flex-wrap items-center justify-between gap-3 border-b border-white/10 bg-surface px-4 py-2">
         <FilterBar filters={filters} onChange={setFilters} options={options} />
 
         <nav className="flex shrink-0 gap-1 rounded-lg border border-white/10 bg-bg/60 p-1 font-mono text-xs">
