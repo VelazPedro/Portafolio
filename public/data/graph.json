@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-10T18:20:10.361Z",
+  "generatedAt": "2026-08-12T15:22:45.947Z",
   "nodes": [
     {
       "id": "BuscadorEnExcel",
@@ -119,8 +119,8 @@
         "hasCI": false,
         "hasDocker": false,
         "hasDocs": false,
-        "daysAlive": 0,
-        "daysSinceLastPush": 0,
+        "daysAlive": 2,
+        "daysSinceLastPush": 2,
         "status": "activo"
       },
       "summary": {
@@ -154,7 +154,7 @@
       "size": 5.2,
       "color": "#3178c6",
       "dashedBorder": false,
-      "cluster": 1
+      "cluster": 0
     },
     {
       "id": "CalculadoraMonotributo",
@@ -211,8 +211,8 @@
         "hasCI": false,
         "hasDocker": false,
         "hasDocs": true,
-        "daysAlive": 66,
-        "daysSinceLastPush": 3,
+        "daysAlive": 68,
+        "daysSinceLastPush": 5,
         "status": "activo"
       },
       "summary": {
@@ -246,7 +246,136 @@
       "size": 9.9,
       "color": "#555555",
       "dashedBorder": false,
-      "cluster": 1
+      "cluster": 0
+    },
+    {
+      "id": "DetectorManos",
+      "repo": {
+        "name": "DetectorManos",
+        "description": null,
+        "url": "https://github.com/VelazPedro/DetectorManos",
+        "homepage": null,
+        "topics": [],
+        "license": null,
+        "createdAt": "2026-08-11T23:32:06Z",
+        "pushedAt": "2026-08-11T23:33:41Z",
+        "commitCount": 1,
+        "stars": 0,
+        "forks": 0,
+        "languages": {
+          "TypeScript": 38368,
+          "HTML": 3603
+        },
+        "defaultBranch": "main",
+        "readme": "# Seguimiento de manos por cámara\n\nApp 100% local de seguimiento de manos en tiempo real: abre la webcam, detecta hasta\n4 manos (para poder probarlo con otra persona delante de cámara) con MediaPipe Tasks\nVision (`HandLandmarker`) y dibuja el esqueleto, las articulaciones, las puntas de\ndedo y una estela por punta sobre un `<canvas>` superpuesto al video. El esqueleto\nse colorea por lado de mano: cian para izquierda, rosa para derecha.\n\nNo hay backend, ni API externa en runtime, ni CDN. Todo lo que el navegador pide\n(WASM del modelo y el archivo `.task`) vive en `public/` y se sirve desde el propio\nproyecto.\n\n## Instalación\n\nRequiere Node 20+ y npm.\n\n```bash\nnpm install\n```\n\n`postinstall` corre `scripts/setup-assets.ts` (con `tsx`) y hace dos cosas:\n\n1. Copia `node_modules/@mediapipe/tasks-vision/wasm` a `public/wasm`.\n2. Descarga `hand_landmarker.task` (una única vez) a `public/models/`.\n\nDespués de un `npm install` exitoso, la app arranca sin necesidad de red.\n\n## Correrlo\n\n```bash\nnpm run dev\n```\n\nEl servidor de Vite escucha en `127.0.0.1` (loopback), nunca en `0.0.0.0`: es un\nproceso local, no publica nada en la red de la empresa. Abrí la URL que imprime\nla terminal (por defecto `http://127.0.0.1:5173`) y dale permiso de cámara al\nnavegador.\n\n```bash\nnpm run build     # build de producción a dist/\nnpm run preview   # sirve dist/ en 127.0.0.1:4173\nnpm run typecheck # tsc --noEmit\nnpm test          # vitest run\n```\n\n## Si el equipo no tiene salida a internet\n\n`npm install` necesita red para bajar las dependencias de npm y, dentro de\n`postinstall`, para descargar `hand_landmarker.task` (unos pocos MB, se sirve desde\n`storage.googleapis.com`). Si esa descarga falla, el script no rompe la instalación:\nimprime la URL exacta y la ruta destino para que la bajes a mano en una máquina con\nred y copies el archivo.\n\nPasos para dejarlo andando sin red en el equipo final:\n\n1. En una máquina con internet: `npm install` (esto ya deja `node_modules/`,\n   `public/wasm/` y `public/models/hand_landmarker.task` completos).\n2. Si el paso de descarga automática falló, bajá el modelo a mano desde la URL que\n   imprimió la consola y guardalo en `public/models/hand_landmarker.task`.\n3. Copiá toda la carpeta del proyecto (incluyendo `node_modules/` y `public/`) al\n   equipo sin salida a internet.\n4. Ahí corré `npm run dev` (o `npm run build && npm run preview`) directamente, sin\n   volver a instalar nada.\n\nUna vez que `public/wasm/` y `public/models/hand_landmarker.task` están presentes,\nninguna parte del flujo de detección hace pedidos de red: todo se carga desde\n`127.0.0.1`.\n\n## Atajos de teclado\n\n| Tecla    | Acción                          |\n| -------- | -------------------------------- |\n| `S`      | Alternar esqueleto (líneas, articulaciones y puntas) |\n| `T`      | Alternar estelas de las puntas de dedo |\n| `C`      | Limpiar estelas                  |\n| `Espacio`| Pausar / reanudar                |\n| `M`      | Espejo on / off                  |\n\n## Estructura\n\n```\nsrc/\n  main.ts                      # armado y loop de render\n  tracking/camera.ts           # getUserMedia + errores tipados\n  tracking/hand-tracker.ts     # wrapper del HandLandmarker\n  tracking/hand-model.ts       # 21 landmarks, conexiones, colores por dedo\n  tracking/gestures.ts         # dedos extendidos, pinza (puro, testeable)\n  drawing/overlay.ts           # esqueleto, articulaciones, puntas\n  drawing/trail.ts             # buffer de estelas con vencimiento por edad\n  shared/errors.ts             # AppError con code + hint\nscripts/setup-assets.ts        # copia WASM + descarga del modelo, en postinstall\n```\n\n## Notas técnicas\n\n- `HandTracker.detect` fuerza timestamps estrictamente crecientes para\n  `detectForVideo`, aun si dos frames de `requestAnimationFrame` llegan con el mismo\n  milisegundo.\n- La inicialización intenta `delegate: \"GPU\"` y cae a `\"CPU\"` si falla, sin romper\n  la app.\n- El overlay se redimensiona con `ResizeObserver` sobre el `<video>` para quedar\n  siempre alineado, tanto si cambia la resolución de cámara como el tamaño de\n  ventana.\n- El espejo se aplica con un `transform: scaleX(-1)` sobre el contenedor\n  `#stage` (video + canvas). El HUD vive fuera de `#stage` a propósito, para que\n  el texto nunca salga invertido.\n- Si una punta de dedo salta más de un 25% del ancho normalizado entre dos frames,\n  la estela corta el segmento en vez de dibujar una recta que cruce la pantalla.\n"
+      },
+      "analysis": {
+        "projectType": {
+          "value": "web-app",
+          "evidence": "index.html presente en el repo"
+        },
+        "primaryFramework": {
+          "value": null,
+          "evidence": "sin framework detectado en dependencias"
+        },
+        "runtime": {
+          "value": "Node",
+          "evidence": "manifiesto: package.json"
+        },
+        "database": {
+          "value": null,
+          "evidence": "sin base de datos detectada en dependencias"
+        },
+        "buildTools": {
+          "value": [
+            "Vite"
+          ],
+          "evidence": "archivos de configuración: Vite"
+        },
+        "testTools": {
+          "value": [
+            "Vitest"
+          ],
+          "evidence": "dependencias: Vitest"
+        },
+        "dependencies": [
+          {
+            "name": "@mediapipe/tasks-vision",
+            "version": "^0.10.17",
+            "type": "prod"
+          },
+          {
+            "name": "@types/node",
+            "version": "^20.14.0",
+            "type": "dev"
+          },
+          {
+            "name": "tsx",
+            "version": "^4.16.2",
+            "type": "dev"
+          },
+          {
+            "name": "typescript",
+            "version": "^5.5.4",
+            "type": "dev"
+          },
+          {
+            "name": "vite",
+            "version": "^5.4.0",
+            "type": "dev"
+          },
+          {
+            "name": "vitest",
+            "version": "^2.0.5",
+            "type": "dev"
+          }
+        ],
+        "fileCount": 19,
+        "maxDepth": 2,
+        "topLevelDirs": [
+          "scripts",
+          "src"
+        ],
+        "hasTests": true,
+        "hasCI": false,
+        "hasDocker": false,
+        "hasDocs": false,
+        "daysAlive": 1,
+        "daysSinceLastPush": 1,
+        "status": "activo"
+      },
+      "summary": {
+        "pitch": "Aplicación web local de seguimiento de manos en tiempo real que abre la webcam, detecta hasta cuatro manos y superpone esqueleto, articulaciones y estelas de las puntas de dedo, ejecutable en equipos sin salida a internet.",
+        "summary": "El seguimiento de manos en el navegador suele apoyarse en modelos y runtimes servidos por CDN, lo que lo vuelve inviable en máquinas aisladas de la red. El proyecto empaqueta todo el flujo de detección dentro del propio proyecto: MediaPipe Tasks Vision (HandLandmarker) con el WASM y el archivo .task alojados en public/, sin backend ni llamadas externas en tiempo de ejecución. El render ocurre sobre un canvas superpuesto al video, con el esqueleto coloreado por lado de mano (cian para izquierda, rosa para derecha) y una estela con vencimiento por edad para cada punta de dedo. La interacción se controla por teclado: alternar esqueleto y estelas, limpiar, pausar y activar el espejo. El README documenta el procedimiento de instalación en dos etapas para dejarlo funcionando en un equipo sin conexión.",
+        "highlights": [
+          "El paso postinstall (scripts/setup-assets.ts) copia el WASM desde node_modules a public/wasm y descarga hand_landmarker.task una única vez; si la descarga falla, imprime la URL y la ruta destino en lugar de abortar la instalación.",
+          "El servidor de Vite se fija a 127.0.0.1 en dev y en preview, de modo que el proceso no queda expuesto en la red local.",
+          "HandTracker.detect fuerza timestamps estrictamente crecientes para detectForVideo, cubriendo el caso de dos frames de requestAnimationFrame con el mismo milisegundo, y la inicialización prueba delegate GPU con caída a CPU.",
+          "Separación entre lógica pura y render: tracking/gestures.ts (dedos extendidos, pinza) queda testeable de forma aislada, mientras drawing/overlay.ts y drawing/trail.ts sólo pintan."
+        ],
+        "techNotes": [
+          "Vite 5 con TypeScript 5.5 en modo ESM; una sola dependencia de runtime, @mediapipe/tasks-vision 0.10, y tsx para ejecutar el script de setup.",
+          "Vitest configurado aparte (vitest.config.ts) además de vite.config.ts, con scripts de typecheck (tsc --noEmit) y test separados.",
+          "Errores modelados como AppError con code y hint en shared/errors.ts, aplicado al acceso de cámara vía getUserMedia en tracking/camera.ts.",
+          "El overlay se realinea con ResizeObserver sobre el elemento video; el espejo es un transform scaleX(-1) aplicado al contenedor #stage, con el HUD deliberadamente fuera de ese contenedor para no invertir el texto."
+        ],
+        "domain": "visión por computadora",
+        "keywords": [
+          "mediapipe tasks vision",
+          "handlandmarker",
+          "21 landmarks",
+          "wasm local",
+          "canvas superpuesto",
+          "estelas con vencimiento",
+          "delegate gpu con fallback cpu",
+          "operación sin conexión"
+        ],
+        "confidence": "alta"
+      },
+      "size": 3.4,
+      "color": "#3178c6",
+      "dashedBorder": false,
+      "cluster": 0
     },
     {
       "id": "ITLeveling",
@@ -311,8 +440,8 @@
         "hasCI": false,
         "hasDocker": false,
         "hasDocs": false,
-        "daysAlive": 5,
-        "daysSinceLastPush": 1,
+        "daysAlive": 7,
+        "daysSinceLastPush": 3,
         "status": "activo"
       },
       "summary": {
@@ -346,7 +475,7 @@
       "size": 6.4,
       "color": "#e34c26",
       "dashedBorder": false,
-      "cluster": 0
+      "cluster": 1
     },
     {
       "id": "PC_DOCTOR",
@@ -453,8 +582,8 @@
         "hasCI": false,
         "hasDocker": false,
         "hasDocs": false,
-        "daysAlive": 2,
-        "daysSinceLastPush": 2,
+        "daysAlive": 4,
+        "daysSinceLastPush": 4,
         "status": "activo"
       },
       "summary": {
@@ -488,7 +617,7 @@
       "size": 3.4,
       "color": "#3572A5",
       "dashedBorder": false,
-      "cluster": 0
+      "cluster": 1
     },
     {
       "id": "PredictorMundial",
@@ -625,8 +754,8 @@
         "hasCI": false,
         "hasDocker": false,
         "hasDocs": false,
-        "daysAlive": 112,
-        "daysSinceLastPush": 5,
+        "daysAlive": 114,
+        "daysSinceLastPush": 7,
         "status": "activo"
       },
       "summary": {
@@ -660,7 +789,7 @@
       "size": 10.4,
       "color": "#3572A5",
       "dashedBorder": false,
-      "cluster": 0
+      "cluster": 1
     },
     {
       "id": "StudyHUD",
@@ -816,8 +945,8 @@
         "hasCI": false,
         "hasDocker": false,
         "hasDocs": false,
-        "daysAlive": 3,
-        "daysSinceLastPush": 3,
+        "daysAlive": 5,
+        "daysSinceLastPush": 5,
         "status": "activo"
       },
       "summary": {
@@ -851,19 +980,24 @@
       "size": 5.2,
       "color": "#3178c6",
       "dashedBorder": false,
-      "cluster": 1
+      "cluster": 0
     }
   ],
   "edges": [
     {
       "source": "BuscadorEnExcel",
-      "target": "StudyHUD",
-      "weight": 0.199,
+      "target": "DetectorManos",
+      "weight": 0.277,
       "reasons": [
         {
           "kind": "lenguaje",
-          "weight": 0.19901757207912374,
-          "detail": "similitud de lenguajes: 100%"
+          "weight": 0.19897585862075676,
+          "detail": "similitud de lenguajes: 99%"
+        },
+        {
+          "kind": "dependencias",
+          "weight": 0.07777777777777777,
+          "detail": "dependencias compartidas: 22%"
         }
       ]
     },
@@ -899,6 +1033,18 @@
           "kind": "dependencias",
           "weight": 0.015909090909090907,
           "detail": "dependencias compartidas: 5%"
+        }
+      ]
+    },
+    {
+      "source": "BuscadorEnExcel",
+      "target": "StudyHUD",
+      "weight": 0.199,
+      "reasons": [
+        {
+          "kind": "lenguaje",
+          "weight": 0.19901757207912374,
+          "detail": "similitud de lenguajes: 100%"
         }
       ]
     }
