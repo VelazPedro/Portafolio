@@ -54,6 +54,8 @@ interface TypedForceGraphProps {
   d3AlphaDecay?: number
   minZoom?: number
   maxZoom?: number
+  enablePanInteraction?: boolean | ((event: MouseEvent) => boolean)
+  enableZoomInteraction?: boolean | ((event: MouseEvent) => boolean)
 }
 
 const ForceGraph2D = ForceGraph2DImpl as unknown as ComponentType<TypedForceGraphProps>
@@ -329,6 +331,32 @@ export function ForceGraph({ graph, selectedId, onSelectNode }: Props) {
     [graphData],
   )
 
+  // La detección de click/arrastre propia (más abajo) hace stopPropagation()
+  // sobre el evento pointerdown de React, lo cual alcanza para frenar el pan
+  // con mouse. Pero en touch, d3-zoom (dentro de la librería) escucha
+  // 'touchstart' nativo por su cuenta — un evento aparte del pointerdown, que
+  // nuestro stopPropagation no toca — así que arrastrar un nodo con el dedo
+  // también paneaba la cámara al mismo tiempo. enablePanInteraction es el
+  // gancho que expone la librería para bloquear el pan en el origen: recibe
+  // el evento nativo (mouse o touch) y devuelve false si el gesto arrancó
+  // sobre un nodo.
+  const getEventClientPoint = (ev: MouseEvent | TouchEvent): { x: number; y: number } | null => {
+    if ('touches' in ev) {
+      const touch = ev.touches[0] ?? ev.changedTouches[0]
+      return touch ? { x: touch.clientX, y: touch.clientY } : null
+    }
+    return { x: ev.clientX, y: ev.clientY }
+  }
+
+  const allowPanOrZoom = useCallback(
+    (ev: MouseEvent) => {
+      const point = getEventClientPoint(ev as unknown as MouseEvent | TouchEvent)
+      if (!point) return true
+      return findNodeAtPoint(point.x, point.y) === null
+    },
+    [findNodeAtPoint],
+  )
+
   // Pointerdown sobre un nodo empieza el arrastre; si el puntero nunca se
   // mueve más que DRAG_TOLERANCE_PX se interpreta como click/tap al soltar
   // (mismo criterio que usa la librería internamente). Se usan Pointer Events
@@ -501,6 +529,8 @@ export function ForceGraph({ graph, selectedId, onSelectNode }: Props) {
           warmupTicks={reducedMotion ? 0 : undefined}
           minZoom={0.3}
           maxZoom={8}
+          enablePanInteraction={allowPanOrZoom}
+          enableZoomInteraction={allowPanOrZoom}
         />
       </div>
 
