@@ -7,7 +7,7 @@ import {
   useState,
   type ComponentType,
   type KeyboardEvent,
-  type MouseEvent as ReactMouseEvent,
+  type PointerEvent as ReactPointerEvent,
   type Ref,
 } from 'react'
 import ForceGraph2DImpl from 'react-force-graph-2d'
@@ -329,14 +329,17 @@ export function ForceGraph({ graph, selectedId, onSelectNode }: Props) {
     [graphData],
   )
 
-  // Mousedown sobre un nodo empieza el arrastre; si el mouse nunca se mueve
-  // más que DRAG_TOLERANCE_PX se interpreta como click al soltar (mismo
-  // criterio que usa la librería internamente). mousemove/mouseup van en
-  // window, no en el contenedor, porque el cursor puede salirse del área
-  // del grafo en medio del arrastre.
-  const dragRef = useRef<{ node: FGNodeRendered; startClientX: number; startClientY: number; moved: boolean } | null>(
-    null,
-  )
+  // Pointerdown sobre un nodo empieza el arrastre; si el puntero nunca se
+  // mueve más que DRAG_TOLERANCE_PX se interpreta como click/tap al soltar
+  // (mismo criterio que usa la librería internamente). Se usan Pointer Events
+  // (no Mouse Events) para que mouse, touch y pen compartan el mismo camino:
+  // en celular no hay mousedown/mousemove reales, así que con solo mouse
+  // events el arrastre y el tap sobre nodos no respondían nunca al tacto.
+  // pointermove/pointerup van en window, no en el contenedor, porque el
+  // puntero puede salirse del área del grafo en medio del arrastre.
+  const dragRef = useRef<
+    { node: FGNodeRendered; startClientX: number; startClientY: number; moved: boolean; pointerId: number } | null
+  >(null)
   const DRAG_TOLERANCE_PX = 4
   // Reheat de la simulación durante el arrastre, espaciado en el tiempo: sin
   // esto habría que elegir entre no reactivar nunca la física (nodos vecinos
@@ -348,42 +351,44 @@ export function ForceGraph({ graph, selectedId, onSelectNode }: Props) {
   const lastReheatAtRef = useRef(0)
   const REHEAT_INTERVAL_MS = 400
 
-  const handleContainerMouseMove = useCallback(
-    (e: ReactMouseEvent<HTMLDivElement>) => {
+  const handleContainerPointerMove = useCallback(
+    (e: ReactPointerEvent<HTMLDivElement>) => {
       if (dragRef.current) return
+      if (e.pointerType === 'touch') return
       const node = findNodeAtPoint(e.clientX, e.clientY)
       setHoveredId(node ? node.id : null)
     },
     [findNodeAtPoint],
   )
 
-  // onMouseDownCapture (no onMouseDown): react-force-graph-2d ata su propio
-  // pan/zoom (d3-zoom) directamente al <canvas>, un descendiente de este div.
-  // Un handler en fase de "bubble" corre DESPUÉS de que el canvas ya recibió
-  // el evento y arrancó su propio pan — preventDefault() no lo frena porque
-  // es un listener nativo distinto en otro elemento. stopPropagation() en
-  // fase de CAPTURA (de afuera hacia adentro) sí lo frena, porque corre antes
-  // de que el evento llegue al canvas. Sin esto, arrastrar un nodo también
-  // paneaba toda la cámara al mismo tiempo (mismo delta del mouse aplicado
-  // dos veces: al nodo y a la vista).
-  const handleContainerMouseDown = useCallback(
-    (e: ReactMouseEvent<HTMLDivElement>) => {
+  // onPointerDownCapture (no onPointerDown): react-force-graph-2d ata su
+  // propio pan/zoom (d3-zoom) directamente al <canvas>, un descendiente de
+  // este div. Un handler en fase de "bubble" corre DESPUÉS de que el canvas
+  // ya recibió el evento y arrancó su propio pan — preventDefault() no lo
+  // frena porque es un listener nativo distinto en otro elemento.
+  // stopPropagation() en fase de CAPTURA (de afuera hacia adentro) sí lo
+  // frena, porque corre antes de que el evento llegue al canvas. Sin esto,
+  // arrastrar un nodo también paneaba/pellizcaba toda la cámara al mismo
+  // tiempo (mismo delta aplicado dos veces: al nodo y a la vista).
+  const handleContainerPointerDown = useCallback(
+    (e: ReactPointerEvent<HTMLDivElement>) => {
       if (!interactive) return
+      if (dragRef.current) return // ya hay un puntero arrastrando (pinch-zoom con 2 dedos no debe pisarlo)
       const node = findNodeAtPoint(e.clientX, e.clientY)
       if (!node) return
       e.preventDefault()
       e.stopPropagation()
-      dragRef.current = { node, startClientX: e.clientX, startClientY: e.clientY, moved: false }
+      dragRef.current = { node, startClientX: e.clientX, startClientY: e.clientY, moved: false, pointerId: e.pointerId }
     },
     [findNodeAtPoint, interactive],
   )
 
   useEffect(() => {
-    const handleWindowMouseMove = (e: MouseEvent) => {
+    const handleWindowPointerMove = (e: PointerEvent) => {
       const drag = dragRef.current
       const fg = fgRef.current
       const el = containerRef.current
-      if (!drag || !fg || !el) return
+      if (!drag || !fg || !el || e.pointerId !== drag.pointerId) return
       const dx = e.clientX - drag.startClientX
       const dy = e.clientY - drag.startClientY
       if (!drag.moved) {
@@ -417,9 +422,9 @@ export function ForceGraph({ graph, selectedId, onSelectNode }: Props) {
       setHoveredId(drag.node.id)
     }
 
-    const handleWindowMouseUp = () => {
+    const handleWindowPointerUp = (e: PointerEvent) => {
       const drag = dragRef.current
-      if (!drag) return
+      if (!drag || e.pointerId !== drag.pointerId) return
       dragRef.current = null
       if (!drag.moved) {
         onSelectNode(drag.node)
@@ -433,13 +438,19 @@ export function ForceGraph({ graph, selectedId, onSelectNode }: Props) {
       fgRef.current?.d3ReheatSimulation()
     }
 
-    window.addEventListener('mousemove', handleWindowMouseMove)
-    window.addEventListener('mouseup', handleWindowMouseUp)
+    // pointercancel: el sistema operativo/navegador puede interrumpir un
+    // touch en curso (gesto de sistema, cambio de app, scroll del navegador
+    // tomando el control). Sin escucharlo, ese dedo queda "atrapado" en
+    // dragRef para siempre y el nodo se ve congelado en su última posición.
+    window.addEventListener('pointermove', handleWindowPointerMove)
+    window.addEventListener('pointerup', handleWindowPointerUp)
+    window.addEventListener('pointercancel', handleWindowPointerUp)
     return () => {
-      window.removeEventListener('mousemove', handleWindowMouseMove)
-      window.removeEventListener('mouseup', handleWindowMouseUp)
+      window.removeEventListener('pointermove', handleWindowPointerMove)
+      window.removeEventListener('pointerup', handleWindowPointerUp)
+      window.removeEventListener('pointercancel', handleWindowPointerUp)
     }
-  }, [onSelectNode, setReady])
+  }, [onSelectNode])
 
   const nodeButtonsRef = useRef<Array<HTMLButtonElement | null>>([])
 
@@ -464,10 +475,10 @@ export function ForceGraph({ graph, selectedId, onSelectNode }: Props) {
       <div
         ref={containerRef}
         className={interactive ? '' : 'pointer-events-none'}
-        style={{ cursor: hoveredId ? 'pointer' : 'default' }}
-        onMouseDownCapture={handleContainerMouseDown}
-        onMouseMove={handleContainerMouseMove}
-        onMouseLeave={() => setHoveredId(null)}
+        style={{ cursor: hoveredId ? 'pointer' : 'default', touchAction: 'none' }}
+        onPointerDownCapture={handleContainerPointerDown}
+        onPointerMove={handleContainerPointerMove}
+        onPointerLeave={() => setHoveredId(null)}
       >
         <ForceGraph2D
           ref={fgRef}
