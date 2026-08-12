@@ -377,8 +377,19 @@ export function ForceGraph({ graph, selectedId, onSelectNode }: Props) {
       if (!drag || !fg || !el) return
       const dx = e.clientX - drag.startClientX
       const dy = e.clientY - drag.startClientY
-      if (!drag.moved && Math.hypot(dx, dy) < DRAG_TOLERANCE_PX) return
-      drag.moved = true
+      if (!drag.moved) {
+        if (Math.hypot(dx, dy) < DRAG_TOLERANCE_PX) return
+        drag.moved = true
+        // Reactiva la simulación para que los nodos conectados reaccionen al
+        // arrastre (si no, quedan estáticos: "las físicas no funcionan"). Se
+        // vuelve a bloquear la interacción (`ready=false`) durante ese
+        // reacomodo — el mismo gate que evita clickear un nodo en movimiento
+        // al cargar la página aplica acá también, porque reactivar la física
+        // reabre esa misma ventana de riesgo. handleEngineStop la repone en
+        // true solo cuando la simulación realmente termina de asentarse.
+        setReady(false)
+        fg.d3ReheatSimulation()
+      }
       const rect = el.getBoundingClientRect()
       const { x, y } = fg.screen2GraphCoords(e.clientX - rect.left, e.clientY - rect.top)
       drag.node.x = x
@@ -401,7 +412,7 @@ export function ForceGraph({ graph, selectedId, onSelectNode }: Props) {
       window.removeEventListener('mousemove', handleWindowMouseMove)
       window.removeEventListener('mouseup', handleWindowMouseUp)
     }
-  }, [onSelectNode])
+  }, [onSelectNode, setReady])
 
   const nodeButtonsRef = useRef<Array<HTMLButtonElement | null>>([])
 
