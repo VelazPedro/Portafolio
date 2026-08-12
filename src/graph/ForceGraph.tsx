@@ -247,55 +247,6 @@ export function ForceGraph({ graph, selectedId, onSelectNode }: Props) {
     [neighborIds],
   )
 
-  // Detección de click/hover propia, independiente del picking interno de
-  // react-force-graph-2d (que lee píxeles de un canvas oculto para saber qué
-  // nodo tocaste). Algunos navegadores/extensiones de privacidad bloquean o
-  // alteran esa lectura como medida anti-fingerprinting: el dibujo se ve
-  // perfecto pero ningún click abre nunca nada, y no hay forma de detectarlo
-  // desde el código. screen2GraphCoords es pura transformación de zoom/pan
-  // (sin leer píxeles), así que este cálculo funciona siempre. onNodeClick/
-  // onNodeHover de la librería quedan igual como respaldo, pero esta es la
-  // vía que de verdad hay que sostener.
-  const containerRef = useRef<HTMLDivElement | null>(null)
-
-  const findNodeAtPoint = useCallback(
-    (clientX: number, clientY: number): GraphNode | null => {
-      const fg = fgRef.current
-      const el = containerRef.current
-      if (!fg || !el) return null
-      const rect = el.getBoundingClientRect()
-      const { x: gx, y: gy } = fg.screen2GraphCoords(clientX - rect.left, clientY - rect.top)
-      let closest: GraphNode | null = null
-      let closestDist = Infinity
-      for (const node of graphData.nodes as FGNodeRendered[]) {
-        if (node.x === undefined || node.y === undefined) continue
-        const dist = Math.hypot(gx - node.x, gy - node.y)
-        if (dist <= nodeRadius(node) && dist < closestDist) {
-          closestDist = dist
-          closest = node
-        }
-      }
-      return closest
-    },
-    [graphData],
-  )
-
-  const handleContainerClick = useCallback(
-    (e: ReactMouseEvent<HTMLDivElement>) => {
-      const node = findNodeAtPoint(e.clientX, e.clientY)
-      if (node) onSelectNode(node)
-    },
-    [findNodeAtPoint, onSelectNode],
-  )
-
-  const handleContainerMouseMove = useCallback(
-    (e: ReactMouseEvent<HTMLDivElement>) => {
-      const node = findNodeAtPoint(e.clientX, e.clientY)
-      setHoveredId(node ? node.id : null)
-    },
-    [findNodeAtPoint],
-  )
-
   const linkColor = useCallback(
     (link: FGLinkRendered) => (isLinkActive(link) ? 'rgba(94, 234, 212, 0.9)' : 'rgba(180, 195, 215, 0.55)'),
     [isLinkActive],
@@ -344,6 +295,114 @@ export function ForceGraph({ graph, selectedId, onSelectNode }: Props) {
 
   const interactive = reducedMotion || ready
 
+  // Detección de click/hover/arrastre propia, independiente del picking
+  // interno de react-force-graph-2d (que lee píxeles de un canvas oculto
+  // —shadow canvas— para saber qué nodo tocaste, y el drag nativo depende
+  // de ese mismo mecanismo). Algunos navegadores/extensiones de privacidad
+  // bloquean o alteran esa lectura como medida anti-fingerprinting: el
+  // dibujo se ve perfecto pero ningún click ni arrastre funciona nunca, sin
+  // ningún error visible. screen2GraphCoords es pura transformación de
+  // zoom/pan (sin leer píxeles), así que este cálculo funciona siempre.
+  // onNodeClick/onNodeHover de la librería quedan igual como respaldo, pero
+  // esta es la vía que de verdad hay que sostener.
+  const containerRef = useRef<HTMLDivElement | null>(null)
+
+  const findNodeAtPoint = useCallback(
+    (clientX: number, clientY: number): FGNodeRendered | null => {
+      const fg = fgRef.current
+      const el = containerRef.current
+      if (!fg || !el) return null
+      const rect = el.getBoundingClientRect()
+      const { x: gx, y: gy } = fg.screen2GraphCoords(clientX - rect.left, clientY - rect.top)
+      let closest: FGNodeRendered | null = null
+      let closestDist = Infinity
+      for (const node of graphData.nodes as FGNodeRendered[]) {
+        if (node.x === undefined || node.y === undefined) continue
+        const dist = Math.hypot(gx - node.x, gy - node.y)
+        if (dist <= nodeRadius(node) && dist < closestDist) {
+          closestDist = dist
+          closest = node
+        }
+      }
+      return closest
+    },
+    [graphData],
+  )
+
+  // Mousedown sobre un nodo empieza el arrastre; si el mouse nunca se mueve
+  // más que DRAG_TOLERANCE_PX se interpreta como click al soltar (mismo
+  // criterio que usa la librería internamente). mousemove/mouseup van en
+  // window, no en el contenedor, porque el cursor puede salirse del área
+  // del grafo en medio del arrastre.
+  const dragRef = useRef<{ node: FGNodeRendered; startClientX: number; startClientY: number; moved: boolean } | null>(
+    null,
+  )
+  const DRAG_TOLERANCE_PX = 4
+
+  const handleContainerMouseMove = useCallback(
+    (e: ReactMouseEvent<HTMLDivElement>) => {
+      if (dragRef.current) return
+      const node = findNodeAtPoint(e.clientX, e.clientY)
+      setHoveredId(node ? node.id : null)
+    },
+    [findNodeAtPoint],
+  )
+
+  // onMouseDownCapture (no onMouseDown): react-force-graph-2d ata su propio
+  // pan/zoom (d3-zoom) directamente al <canvas>, un descendiente de este div.
+  // Un handler en fase de "bubble" corre DESPUÉS de que el canvas ya recibió
+  // el evento y arrancó su propio pan — preventDefault() no lo frena porque
+  // es un listener nativo distinto en otro elemento. stopPropagation() en
+  // fase de CAPTURA (de afuera hacia adentro) sí lo frena, porque corre antes
+  // de que el evento llegue al canvas. Sin esto, arrastrar un nodo también
+  // paneaba toda la cámara al mismo tiempo (mismo delta del mouse aplicado
+  // dos veces: al nodo y a la vista).
+  const handleContainerMouseDown = useCallback(
+    (e: ReactMouseEvent<HTMLDivElement>) => {
+      if (!interactive) return
+      const node = findNodeAtPoint(e.clientX, e.clientY)
+      if (!node) return
+      e.preventDefault()
+      e.stopPropagation()
+      dragRef.current = { node, startClientX: e.clientX, startClientY: e.clientY, moved: false }
+    },
+    [findNodeAtPoint, interactive],
+  )
+
+  useEffect(() => {
+    const handleWindowMouseMove = (e: MouseEvent) => {
+      const drag = dragRef.current
+      const fg = fgRef.current
+      const el = containerRef.current
+      if (!drag || !fg || !el) return
+      const dx = e.clientX - drag.startClientX
+      const dy = e.clientY - drag.startClientY
+      if (!drag.moved && Math.hypot(dx, dy) < DRAG_TOLERANCE_PX) return
+      drag.moved = true
+      const rect = el.getBoundingClientRect()
+      const { x, y } = fg.screen2GraphCoords(e.clientX - rect.left, e.clientY - rect.top)
+      drag.node.x = x
+      drag.node.y = y
+      drag.node.fx = x
+      drag.node.fy = y
+      setHoveredId(drag.node.id)
+    }
+
+    const handleWindowMouseUp = () => {
+      const drag = dragRef.current
+      if (!drag) return
+      dragRef.current = null
+      if (!drag.moved) onSelectNode(drag.node)
+    }
+
+    window.addEventListener('mousemove', handleWindowMouseMove)
+    window.addEventListener('mouseup', handleWindowMouseUp)
+    return () => {
+      window.removeEventListener('mousemove', handleWindowMouseMove)
+      window.removeEventListener('mouseup', handleWindowMouseUp)
+    }
+  }, [onSelectNode])
+
   const nodeButtonsRef = useRef<Array<HTMLButtonElement | null>>([])
 
   const handleKeyDown = (e: KeyboardEvent<HTMLButtonElement>, index: number) => {
@@ -368,7 +427,7 @@ export function ForceGraph({ graph, selectedId, onSelectNode }: Props) {
         ref={containerRef}
         className={interactive ? '' : 'pointer-events-none'}
         style={{ cursor: hoveredId ? 'pointer' : 'default' }}
-        onClick={handleContainerClick}
+        onMouseDownCapture={handleContainerMouseDown}
         onMouseMove={handleContainerMouseMove}
         onMouseLeave={() => setHoveredId(null)}
       >
