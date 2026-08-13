@@ -56,6 +56,8 @@ interface TypedForceGraphProps {
   maxZoom?: number
   enablePanInteraction?: boolean | ((event: MouseEvent) => boolean)
   enableZoomInteraction?: boolean | ((event: MouseEvent) => boolean)
+  width?: number
+  height?: number
 }
 
 const ForceGraph2D = ForceGraph2DImpl as unknown as ComponentType<TypedForceGraphProps>
@@ -148,6 +150,24 @@ interface Props {
 
 export function ForceGraph({ graph, selectedId, onSelectNode }: Props) {
   const fgRef = useRef<FGMethods | null>(null)
+  // El <ForceGraph2D> se monta recién cuando `size` está medido (ver más
+  // abajo), o sea DESPUÉS del primer useLayoutEffect de este componente. Un
+  // useRef solo no avisa cuándo aparece la instancia, así que el effect que
+  // configura las fuerzas de d3 se ejecutaba con fgRef.current === null y
+  // salía sin hacer nada: el grafo se asentaba con los valores por defecto de
+  // d3-force (charge -30, link distance 30) en vez de los nuestros. Recién al
+  // cambiar un filtro el effect volvía a correr, ya con instancia, y aplicaba
+  // charge -260 / distance 260 de golpe — eso era el "reset rompe los nodos y
+  // extiende las conexiones" (el layout pasaba a ser ~8x más grande, y el
+  // zoomToFit alejaba la cámara para cubrirlo, achicando los nodos en
+  // pantalla). Este state es lo que hace que el effect vuelva a correr apenas
+  // la instancia existe, para que la configuración sea la misma desde el
+  // primer asentamiento.
+  const [fgMounted, setFgMounted] = useState(false)
+  const setFgRef = useCallback((instance: FGMethods | null) => {
+    fgRef.current = instance
+    setFgMounted(instance !== null)
+  }, [])
   const [hoveredId, setHoveredId] = useState<string | null>(null)
   const [focusedId, setFocusedId] = useState<string | null>(null)
   const reducedMotion = usePrefersReducedMotion()
@@ -162,12 +182,41 @@ export function ForceGraph({ graph, selectedId, onSelectNode }: Props) {
   // Si le pasáramos las referencias originales del estado de React, esa
   // mutación corrompería graph.edges para siempre (source/target dejarían de
   // ser strings comparables). Por eso se clona todo acá.
+  //
+  // prevNodesRef guarda el array de nodos EN VIVO (los mismos objetos que la
+  // simulación va mutando con x/y en cada tick), para los nodos nuevos que
+  // nunca estuvieron en el layout inicial completo.
+  //
+  // initialPositionsRef guarda una FOTO de las posiciones ya asentadas la
+  // primera vez que el grafo completo (sin filtrar) terminó de acomodarse
+  // (se llena en handleEngineStop más abajo). El problema no era solo
+  // "sugerir" un x/y de arranque: react-force-graph vuelve a poner
+  // alpha=1 (recalienta la física) en CADA cambio de datos (ver `update()`
+  // en force-graph.mjs), así que aunque el nodo arrancara en su posición
+  // vieja, la física lo podía volver a mover igual durante ese re-asentado
+  // — sobre todo con menos nodos filtrados (menos competencia por
+  // repulsión = equilibrio más disperso), y al volver a "reset" ese
+  // desplazamiento quedaba pegado. La única forma de garantizar la MISMA
+  // forma siempre es no dejar que la física los toque: los nodos que ya
+  // conocemos de la foto inicial se fijan con fx/fy a esa posición (fx/fy
+  // hace que d3-force los trate como anclados, ignora fuerzas sobre ellos).
+  // Solo un nodo nuevo (nunca visto en el grafo completo) entraría libre.
+  // Arrastrar un nodo a mano lo desancla igual que antes (ver drag más abajo).
+  const prevNodesRef = useRef<FGNodeRendered[]>([])
+  const initialPositionsRef = useRef<Map<string, { x: number; y: number }> | null>(null)
+
   const graphData = useMemo(() => {
+    const prevById = new Map(prevNodesRef.current.map((n) => [n.id, n]))
     const nodes = graph.nodes.map((n) => {
       const pos = staticLayout?.get(n.id)
-      return pos ? { ...n, fx: pos.x, fy: pos.y, x: pos.x, y: pos.y } : { ...n }
+      if (pos) return { ...n, fx: pos.x, fy: pos.y, x: pos.x, y: pos.y }
+      const anchor = initialPositionsRef.current?.get(n.id)
+      if (anchor) return { ...n, x: anchor.x, y: anchor.y, fx: anchor.x, fy: anchor.y }
+      const prev = prevById.get(n.id)
+      return prev?.x !== undefined && prev?.y !== undefined ? { ...n, x: prev.x, y: prev.y } : { ...n }
     })
     const links = graph.edges.map((e) => ({ ...e }))
+    prevNodesRef.current = nodes
     return { nodes, links }
   }, [graph, staticLayout])
 
@@ -286,14 +335,46 @@ export function ForceGraph({ graph, selectedId, onSelectNode }: Props) {
     fg.d3Force('charge')?.strength?.(-260)
     fg.d3Force('link')?.distance?.(150)
     fg.d3ReheatSimulation()
-  }, [nodeIdsKey, reducedMotion])
+  }, [nodeIdsKey, reducedMotion, fgMounted])
 
   const handleEngineStop = useCallback(() => {
     setReady(true)
+
+    // graphData fija (fx/fy) los nodos ya conocidos a su posición ancla
+    // SOLO para que la física no los mueva mientras el grafo se está
+    // reacomodando por un cambio de filtro (ver comentario en graphData).
+    // Si se dejaran fijos para siempre, el día que el usuario arrastra UNO
+    // se vuelve el único cuerpo libre en una estructura rígida: toda la
+    // tensión de sus fuerzas (charge + link contra vecinos inmóviles) se
+    // concentra en ese nodo solo y lo dispara/oscila — "las físicas rotas".
+    // Por eso, apenas termina de asentarse (acá, en cada engine stop, no
+    // solo el primero), se liberan todos para que el grafo vuelva a ser una
+    // simulación libre normal hasta el próximo cambio de filtro.
+    for (const node of prevNodesRef.current) {
+      if (!staticLayout?.has(node.id)) {
+        node.fx = undefined
+        node.fy = undefined
+      }
+    }
+
     if (hasFittedRef.current) return
     hasFittedRef.current = true
     fgRef.current?.zoomToFit(400, 80)
-  }, [])
+    // Solo la primerísima vez que un asentamiento termina en toda la vida
+    // del componente (que, al montar, siempre es con el grafo completo sin
+    // filtrar) se guarda la foto de posiciones. hasFittedRef se resetea en
+    // cada cambio de filtro para volver a hacer zoomToFit, pero esta foto NO
+    // se debe pisar con layouts de subconjuntos filtrados (más espaciados
+    // por tener menos nodos compitiendo por repulsión) — si no, "reset"
+    // volvería a un layout intermedio en vez de al original.
+    if (!initialPositionsRef.current) {
+      const snapshot = new Map<string, { x: number; y: number }>()
+      for (const node of prevNodesRef.current) {
+        if (node.x !== undefined && node.y !== undefined) snapshot.set(node.id, { x: node.x, y: node.y })
+      }
+      initialPositionsRef.current = snapshot
+    }
+  }, [staticLayout])
 
   const interactive = reducedMotion || ready
 
@@ -308,6 +389,36 @@ export function ForceGraph({ graph, selectedId, onSelectNode }: Props) {
   // onNodeClick/onNodeHover de la librería quedan igual como respaldo, pero
   // esta es la vía que de verdad hay que sostener.
   const containerRef = useRef<HTMLDivElement | null>(null)
+
+  // react-force-graph-2d no trae ResizeObserver propio: si no le pasamos
+  // width/height, usa window.innerWidth/innerHeight fijados una sola vez al
+  // montar (ver adjustCanvasSize/resetTransform en force-graph.mjs). El
+  // header ocupa espacio arriba del contenedor, así que esas dimensiones ya
+  // arrancan desalineadas del tamaño real; y como resetTransform() lee
+  // devicePixelRatio fresco en cada frame pero el canvas interno queda con
+  // el tamaño de memoria viejo, cualquier cambio de zoom del navegador
+  // (que sí cambia window.innerWidth/innerHeight y devicePixelRatio) deja
+  // la matriz de transformación del canvas completamente desincronizada del
+  // buffer real. Mientras tanto nuestro propio hit-test (findNodeAtPoint)
+  // usa el rect en vivo del contenedor, así que ese desfase es justo lo que
+  // rompe arrastre/click bajo zoom. Medimos el contenedor nosotros mismos y
+  // se lo pasamos explícito para que la librería nunca use su default.
+  const [size, setSize] = useState<{ width: number; height: number } | null>(null)
+
+  useLayoutEffect(() => {
+    const el = containerRef.current
+    if (!el) return
+    const measure = () => {
+      const rect = el.getBoundingClientRect()
+      if (rect.width > 0 && rect.height > 0) {
+        setSize({ width: rect.width, height: rect.height })
+      }
+    }
+    measure()
+    const observer = new ResizeObserver(measure)
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
 
   const findNodeAtPoint = useCallback(
     (clientX: number, clientY: number): FGNodeRendered | null => {
@@ -502,14 +613,17 @@ export function ForceGraph({ graph, selectedId, onSelectNode }: Props) {
     <div className="relative h-full w-full">
       <div
         ref={containerRef}
-        className={interactive ? '' : 'pointer-events-none'}
+        className={`h-full w-full ${interactive ? '' : 'pointer-events-none'}`}
         style={{ cursor: hoveredId ? 'pointer' : 'default', touchAction: 'none' }}
         onPointerDownCapture={handleContainerPointerDown}
         onPointerMove={handleContainerPointerMove}
         onPointerLeave={() => setHoveredId(null)}
       >
+        {size && (
         <ForceGraph2D
-          ref={fgRef}
+          ref={setFgRef}
+          width={size.width}
+          height={size.height}
           graphData={graphData}
           backgroundColor="#0b0d10"
           nodeId="id"
@@ -532,6 +646,7 @@ export function ForceGraph({ graph, selectedId, onSelectNode }: Props) {
           enablePanInteraction={allowPanOrZoom}
           enableZoomInteraction={allowPanOrZoom}
         />
+        )}
       </div>
 
       {!interactive && (
